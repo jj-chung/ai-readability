@@ -15,7 +15,7 @@ def trained_KNN_model(word_vectors, mpaa_ratings):
   knn = KNeighborsClassifier()
 
   # Use GridSearch
-  clf = GridSearchCV(knn, hyperparameters, cv=1)
+  clf = GridSearchCV(knn, hyperparameters, cv=2)
 
   # Fit the model
   best_model = clf.fit(word_vectors, mpaa_ratings)
@@ -32,7 +32,7 @@ def plot_scores(clf):
   scores = clf.cv_results_
 
 if __name__ == "__main__":
-  word_vectors = [[3], [4], [2]]
+  word_vectors = [["hello"], ["hi"], ["hey"]]
   mpaa_ratings = [1, 0, 1]
   clf, best_model = trained_KNN_model(word_vectors, mpaa_ratings)
-  print([0].cv_results_)
+  print(clf.cv_results_)

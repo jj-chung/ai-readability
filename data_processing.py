@@ -42,11 +42,22 @@ def text_test_data():
   array = test_data()
   return array[:, 14]
 
+"""
+Only return MPAA ratings for training (numbers)
+"""
+def mpaa_train_data():
+  array = train_data()
+  return array[:, 12]
+
+"""
+Only return MPAA ratings for testing (numbers)
+"""
+def mpaa_test_data():
+  array = test_data()
+  return array[:, 12]
+
 
 if __name__ == "__main__":
-<<<<<<< HEAD
   print(test_data())
-=======
   print(train_data())
   print(text_train_data())
->>>>>>> 02369b38eebdea598bbf305c4a9fa2779050104e
