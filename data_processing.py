@@ -29,4 +29,4 @@ def test_data():
   return all_data[mask, :]
 
 if __name__ == "__main__":
-  print(train_data())
+  print(test_data())
