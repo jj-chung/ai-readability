@@ -17,15 +17,16 @@ Only return train data.
 """
 def train_data():
   all_data = get_all_data()
-  train_data = ""
-  print(all_data)
-  return train_data
+  mask = (all_data[:, -1] == "Train")
+  return all_data[mask, :]
 
 """
 Only return test data
 """
 def test_data():
   all_data = get_all_data()
+  mask = (all_data[:, -1] == "Test")
+  return all_data[mask, :]
 
 if __name__ == "__main__":
   print(train_data())
