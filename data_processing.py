@@ -28,5 +28,21 @@ def test_data():
   mask = (all_data[:, -1] == "Test")
   return all_data[mask, :]
 
+"""
+Only return the array of text excerpts for training
+"""
+def text_train_data():
+  array = train_data()
+  return array[:, 14]
+
+"""
+Only return the array of text excerpts for testing
+"""
+def text_test_data():
+  array = test_data()
+  return array[:, 14]
+
+
 if __name__ == "__main__":
   print(train_data())
+  print(text_train_data())
