@@ -10,5 +10,9 @@ def get_all_data():
   my_data = np.asarray(df) 
   return my_data
 
+#heyyy
+#helo
+
+
 if __name__ == "__main__":
   print(get_all_data())
