@@ -1,8 +1,10 @@
 import pandas as pd 
 import numpy as np 
 
+"""
+Return all data available (test and train).
+"""
 def get_all_data():
-  # my_data = genfromtxt('CLEAR_Corpus_6.01.csv', delimiter=',', dtype=None)
   # read excel in data frame 
   df = pd.read_excel('CLEAR_Corpus_6.01.xlsx') 
   
@@ -10,5 +12,20 @@ def get_all_data():
   my_data = np.asarray(df) 
   return my_data
 
+"""
+Only return train data.
+"""
+def train_data():
+  all_data = get_all_data()
+  train_data = ""
+  print(all_data)
+  return train_data
+
+"""
+Only return test data
+"""
+def test_data():
+  all_data = get_all_data()
+
 if __name__ == "__main__":
-  print(get_all_data())
+  print(train_data())
