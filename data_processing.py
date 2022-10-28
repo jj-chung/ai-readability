@@ -122,7 +122,6 @@ def create_new_features(function):
   for excerpt in data_excerpts:
     # Compute average word length for the excerpt
     words = excerpt.split()
-    print(words)
 
     total_avg = sum( map(len, words) ) / len(words)
     avg_word_length.append(total_avg)

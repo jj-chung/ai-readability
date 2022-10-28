@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 import json
 from data_processing import create_new_features
+from data_processing import train_data
 
 def train_linear_regression(X, y):
     reg = LinearRegression().fit(X, y)
@@ -42,8 +43,8 @@ if __name__ == "__main__":
     # reg = train_linear_regression(X, y)
     # predict_linear_regression(reg, X, y)
 
-    X = np.array([[1, 1], [1, 2], [2, 2], [2, 3]])
-    y = 1 * x_0 + 2 * x_1 + 3
-    y = np.dot(X, np.array([1, 2])) + 3
+    data = create_new_features(train_data)
+    X = data[:, [0, 1]]
+    y = data[:, 2]
     reg = train_linear_regression(X, y)
     predict_linear_regression(reg, X, y)
