@@ -5,10 +5,13 @@ const puppeteer = require('puppeteer');
 const fs = require('fs/promises');
 var csv = require("csvtojson");
 
+var count = 0;
+var error_count = 0
+
 const URL = 'http://www.roadtogrammar.com/textanalysis/';
 
 function level_to_int(level) {
-    if (level === 'A1') {
+    if (level === 'A2') {
         return 1;
     }
     if (level === 'B1') {
@@ -27,8 +30,8 @@ function level_to_int(level) {
 
 // initalize the browser URL
 async function initBrowser() {
-    // const browser = await puppeteer.launch();
-    const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions']})
+    const browser = await puppeteer.launch();
+    // const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions']})
     const page = await browser.newPage();
     await page.goto(URL);
     return page;
@@ -42,6 +45,7 @@ async function get_cefr_values(page, string_text) {
     await page.evaluate(() => {document.getElementById('butang1').click()});
     await page.waitForTimeout(700);
 
+    try {
     // get the level rating
     const level_text = await page.evaluate(() => {
         const temp = document.getElementById("text3").innerText;
@@ -49,6 +53,7 @@ async function get_cefr_values(page, string_text) {
     });
     level = level_text.slice(-2);
     level_number = level_to_int(level);
+    
 
     // get the partial color percentage
     const boxHTML = await page.evaluate((level_number) => {
@@ -57,30 +62,42 @@ async function get_cefr_values(page, string_text) {
         return element;
     }, level_number);
     percent_add = boxHTML.slice(boxHTML.indexOf('width:') + 7, boxHTML.indexOf('%'));
-    const final_level = level_number + parseFloat(percent_add)/100 - 1;
-
+    const final_level = level_number + parseFloat(percent_add)/100 - 1; 
+     
     // click new text button
     await page.evaluate(() => {document.getElementById('butang3').click()});
     await page.waitForTimeout(100);
     return final_level;
+
+    } 
+    catch(err) {
+        console.log('ERROR t_t' + err);
+        await page.screenshot({path: `picture${count}.png`});
+    }
+
+    throw 'POOP';
 }
 
 async function run_cefr_bot (string_texts) {
     const page = await initBrowser();
-    let count = 0;
     const finalDict = {};
     for (let dicts of string_texts) {
-        count += 1;
-        const string_text = dicts.excerpt;
-        cefr_lvl = await get_cefr_values(page, string_text);
-        dicts.cefr_lvl = cefr_lvl;
-        id = dicts.id;
+        try {
+            const string_text = dicts.excerpt;
+            cefr_lvl = await get_cefr_values(page, string_text);
+            dicts.cefr_lvl = cefr_lvl;
+            id = dicts.id;
 
-        finalDict[id] = dicts;
-
-        console.log(dicts);
-        console.log(count);
-        console.log(dicts['excerpt'])
+            finalDict[id] = dicts;
+            console.log(dicts);
+        } catch(err) {
+            error_count += 1;
+            console.log('ERROR T_T' + err);
+        } finally {
+            count += 1;
+            console.log(count);
+        }
+    
         // if (count > 4) { break; }
     }
 
@@ -94,6 +111,7 @@ async function run_cefr_bot (string_texts) {
     })
 
     console.log("LOOK YOU'RE DONE!");
+    console.log(`Completed with ${error_count} errors`)
 }
 
 const string_texts = [];
