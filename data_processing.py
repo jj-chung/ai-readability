@@ -1,5 +1,8 @@
 import pandas as pd 
-import numpy as np 
+import numpy as np
+import sklearn
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 
 """
 Return all data available (test and train).
@@ -55,6 +58,30 @@ Only return MPAA ratings for testing (numbers)
 def mpaa_test_data():
   array = test_data()
   return array[:, 12]
+
+"""
+Convert training text to word vector
+"""
+
+def word_vectorizer():
+  text = text_train_data()
+  count_vect = sklearn.feature_extraction.text.CountVectorizer()
+  X_train_counts = count_vect.fit_transform(text)
+  tfidf_transformer = TfidfTransformer()
+  X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
+  return X_train_tfidf
+
+"""
+Convert test text to word vector
+"""
+
+def word_vectorizer2():
+  text = text_test_data()
+  count_vect = sklearn.feature_extraction.text.CountVectorizer()
+  X_train_counts = count_vect.fit_transform(text)
+  tfidf_transformer = TfidfTransformer()
+  X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
+  return X_train_tfidf
 
 
 if __name__ == "__main__":
