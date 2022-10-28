@@ -58,9 +58,10 @@ if __name__ == "__main__":
   words = data_processing.word_vectorizer()
   mpaa_ratings = data_processing.mpaa_train_data()
   test_train = data_processing.word_vectorizer2()
+  #print(test_train)
   test_target = data_processing.mpaa_test_data()
   #[1, 0, 1, 1, 0, 1]
-  print(test_train, "\n \n")
-  print(words)
+  #print(test_train, "\n \n")
+  #rint(words)
   accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
   print(accuracy)

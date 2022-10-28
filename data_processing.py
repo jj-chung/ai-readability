@@ -65,7 +65,7 @@ Convert training text to word vector
 
 def word_vectorizer():
   text = text_train_data()
-  count_vect = sklearn.feature_extraction.text.CountVectorizer()
+  count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=2000)
   X_train_counts = count_vect.fit_transform(text)
   tfidf_transformer = TfidfTransformer()
   X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
@@ -77,7 +77,7 @@ Convert test text to word vector
 
 def word_vectorizer2():
   text = text_test_data()
-  count_vect = sklearn.feature_extraction.text.CountVectorizer()
+  count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=2000)
   X_train_counts = count_vect.fit_transform(text)
   tfidf_transformer = TfidfTransformer()
   X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
