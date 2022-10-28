@@ -56,6 +56,10 @@ def mpaa_test_data():
   array = test_data()
   return array[:, 12]
 
+"""
+Create 2 new features using text excerpts: 
+"""
+
 
 if __name__ == "__main__":
   print(test_data())
