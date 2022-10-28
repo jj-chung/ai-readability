@@ -31,7 +31,8 @@ def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
   print('Best n_neighbors:', best_model.best_estimator_.get_params()['n_neighbors'])
 
   predict_test = clf.predict(test_train)
-  # return the best model 
+  # return the best model
+  #return accuracy rate
   return np.mean(predict_test == test_target)*100
 
 
