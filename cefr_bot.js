@@ -27,7 +27,8 @@ function level_to_int(level) {
 
 // initalize the browser URL
 async function initBrowser() {
-    const browser = await puppeteer.launch();
+    // const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions']})
     const page = await browser.newPage();
     await page.goto(URL);
     return page;
@@ -66,10 +67,10 @@ async function get_cefr_values(page, string_text) {
 
 async function run_cefr_bot (string_texts) {
     const page = await initBrowser();
-    // let count = 0;
+    let count = 0;
     const finalDict = {};
     for (let dicts of string_texts) {
-        // count += 1;
+        count += 1;
         const string_text = dicts.excerpt;
         cefr_lvl = await get_cefr_values(page, string_text);
         dicts.cefr_lvl = cefr_lvl;
@@ -78,6 +79,8 @@ async function run_cefr_bot (string_texts) {
         finalDict[id] = dicts;
 
         console.log(dicts);
+        console.log(count);
+        console.log(dicts['excerpt'])
         // if (count > 4) { break; }
     }
 
