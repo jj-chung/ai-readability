@@ -1,23 +1,26 @@
 import numpy as np
+import sklearn
+import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import confusion_matrix,plot_confusion_matrix
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix
 import data_processing
+from sklearn import metrics
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
   # List Hyperparameters that we want to tune
-  leaf_size = list(range(1,3))
-  n_neighbors = list(range(1,3))
+  leaf_size = list(range(1,9))
+  n_neighbors = list(range(1,9))
   p = [1, 2]
 
   # Convert to dictionary
   hyperparameters = dict(leaf_size=leaf_size, n_neighbors=n_neighbors, p=p)
 
   # Create new KNN object
-  knn = KNeighborsClassifier()
+  knn = KNeighborsClassifier(n_neighbors=8)
 
   # Use GridSearch
   clf = GridSearchCV(knn, hyperparameters, cv=2)
@@ -33,7 +36,7 @@ def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
   predict_test = clf.predict(test_train)
   # return the best model
   #return accuracy rate
-  return np.mean(predict_test == test_target)*100
+  return predict_test, np.mean(predict_test == test_target)*100
 
 
 def plot_scores(clf):
@@ -60,5 +63,12 @@ if __name__ == "__main__":
   mpaa_ratings = data_processing.mpaa_train_data()
   test_train = data_processing.word_vectorizer2()
   test_target = data_processing.mpaa_test_data()
-  accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+  predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+  print(predicted)
+  y_true = data_processing.mpaa_test_data().astype(int)
+  print(y_true)
+  matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
+  cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
+  cm_display.plot()
+  plt.show()
   print("ayo ur knn accuracy is:", accuracy)
