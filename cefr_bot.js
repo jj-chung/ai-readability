@@ -45,58 +45,54 @@ async function get_cefr_values(page, string_text) {
     await page.evaluate(() => {document.getElementById('butang1').click()});
     await page.waitForTimeout(700);
 
+    let final_level = -1;
+
     try {
-    // get the level rating
-    const level_text = await page.evaluate(() => {
-        const temp = document.getElementById("text3").innerText;
-        return temp;
-    });
-    level = level_text.slice(-2);
-    level_number = level_to_int(level);
-    
+        // get the level rating
+        const level_text = await page.evaluate(() => {
+            const temp = document.getElementById("text3").innerText;
+            return temp;
+        });
+        level = level_text.slice(-2);
+        level_number = level_to_int(level);
 
-    // get the partial color percentage
-    const boxHTML = await page.evaluate((level_number) => {
-        const queryId = `a${level_number}1`;
-        const element = document.getElementById(queryId).outerHTML;
-        return element;
-    }, level_number);
-    percent_add = boxHTML.slice(boxHTML.indexOf('width:') + 7, boxHTML.indexOf('%'));
-    const final_level = level_number + parseFloat(percent_add)/100 - 1; 
-     
-    // click new text button
-    await page.evaluate(() => {document.getElementById('butang3').click()});
-    await page.waitForTimeout(100);
-    return final_level;
-
+        // get the partial color percentage
+        const boxHTML = await page.evaluate((level_number) => {
+            const queryId = `a${level_number}1`;
+            const element = document.getElementById(queryId).outerHTML;
+            return element;
+        }, level_number);
+        percent_add = boxHTML.slice(boxHTML.indexOf('width:') + 7, boxHTML.indexOf('%'));
+        final_level = level_number + parseFloat(percent_add)/100 - 1; 
     } 
     catch(err) {
         console.log('ERROR t_t' + err);
+        error_count += 1;
         await page.screenshot({path: `picture${count}.png`});
-    }
 
-    throw 'POOP';
+    } finally {
+        // click new text button
+        await page.evaluate(() => {document.getElementById('butang3').click()});
+        await page.waitForTimeout(100);
+        return final_level;
+    }
 }
 
 async function run_cefr_bot (string_texts) {
     const page = await initBrowser();
     const finalDict = {};
     for (let dicts of string_texts) {
-        try {
-            const string_text = dicts.excerpt;
-            cefr_lvl = await get_cefr_values(page, string_text);
-            dicts.cefr_lvl = cefr_lvl;
-            id = dicts.id;
 
-            finalDict[id] = dicts;
-            console.log(dicts);
-        } catch(err) {
-            error_count += 1;
-            console.log('ERROR T_T' + err);
-        } finally {
-            count += 1;
-            console.log(count);
-        }
+        const string_text = dicts.excerpt;
+        cefr_lvl = await get_cefr_values(page, string_text);
+        dicts.cefr_lvl = cefr_lvl;
+        id = dicts.id;
+
+        finalDict[id] = dicts;
+        console.log(dicts);
+
+        count += 1;
+        console.log(count);
     
         // if (count > 4) { break; }
     }
