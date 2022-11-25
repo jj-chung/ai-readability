@@ -68,7 +68,9 @@ if __name__ == "__main__":
   y_true = data_processing.mpaa_test_data().astype(int)
   print(y_true)
   matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
+  label_font = {'size': '18'}
   cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
   cm_display.plot()
+  plt.rcParams.update({'font.size': 33})
   plt.show()
   print("ayo ur knn accuracy is:", accuracy)
