@@ -9,6 +9,15 @@ from sklearn import metrics
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import f1_score
+
+def trained_NB_model(word_vectors, mpaa_ratings, test_train, test_target):
+  model = MultinomialNB().fit(word_vectors, mpaa_ratings)
+  predict_test = model.predict(test_train)
+  return predict_test, np.mean(predict_test == test_target)*100
 
 def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
   # List Hyperparameters that we want to tune
@@ -67,10 +76,19 @@ if __name__ == "__main__":
   print(predicted)
   y_true = data_processing.mpaa_test_data().astype(int)
   print(y_true)
-  matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
+  '''matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
+  label_font = {'size': '18'}
+  cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
+  cm_display.plot()
+  plt.rcParams.update({'font.size': 33})
+  plt.show()'''
+  print("ur knn accuracy is:", accuracy)
+  predicted_NB, accuracy_NB = trained_NB_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+  print("ur NB accuracy is: ", accuracy_NB)
+  #2nd confusion matrix for NB
+  matrix = sklearn.metrics.confusion_matrix(y_true, predicted_NB)
   label_font = {'size': '18'}
   cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
   cm_display.plot()
   plt.rcParams.update({'font.size': 33})
   plt.show()
-  print("ayo ur knn accuracy is:", accuracy)
