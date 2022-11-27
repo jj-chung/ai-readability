@@ -92,8 +92,9 @@ def create_new_features(type="train", baseline=True):
   for excerpt in data_excerpts:
     print(excerpt)
     # Compute average word length for the excerpt
-    words = excerpt.split(' ')
-    print(words)
+    doc = nlp(excerpt)
+    words = [token.text for token in doc if (not token.is_punct and token.text != '\n')]
+    syllables_list = [token._.syllables_count for token in doc if (not token.is_punct and token.text != '\n')]
 
     total_avg = sum( map(len, words) ) / len(words)
     avg_word_length.append(total_avg)
@@ -110,10 +111,7 @@ def create_new_features(type="train", baseline=True):
     unique_word_ct.append(len(set(words)))
 
     # Consider the average number of syllables
-    doc = nlp(excerpt)
-    syllables_list = [token._.syllables_count for token in doc]
-    print(words)
-    print(syllables_list)
+    syllables_list = [s_count for s_count in syllables_list if s_count is not None]
     avg_syllables.append(np.average(np.array(syllables_list)))
 
   # Create a numpy array with the average word length as a column,
