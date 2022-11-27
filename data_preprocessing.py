@@ -12,7 +12,8 @@ from nltk.stem import WordNetLemmatizer
 import contractions
 import spacy
 from spacy_syllables import SpacySyllables
-#import en_core_web_sm
+from spacy.lang.en import English
+from spacy.pipeline import Sentencizer
 
 """
 Convert text to word vector.
@@ -89,8 +90,12 @@ def create_new_features(type="train", baseline=True):
   nlp = spacy.load("en_core_web_sm")
   nlp.add_pipe("syllables", after="tagger")
 
-  for excerpt in data_excerpts:
-    print(excerpt)
+  for i in range(data_excerpts.shape[0]):
+    excerpt = data_excerpts[i]
+
+    if i % 100 == 0:
+      print(i)
+
     # Compute average word length for the excerpt
     doc = nlp(excerpt)
     words = [token.text for token in doc if (not token.is_punct and token.text != '\n')]
@@ -100,7 +105,11 @@ def create_new_features(type="train", baseline=True):
     avg_word_length.append(total_avg)
 
     # Compute average sentence length for the excerpt
-    sentences = excerpt.split(".")
+    nlp = English()
+    nlp.add_pipe('sentencizer')
+
+    sentences = [sent for sent in doc.sents]
+
     total_avg = sum( map(len, sentences) ) / len(sentences)
     avg_sentence_length.append(total_avg)
 
@@ -124,8 +133,6 @@ def create_new_features(type="train", baseline=True):
   elif type == "test":
     bt_easiness = bt_easiness_test_data()
 
-  print(unique_word_ct)
-  print(avg_syllables)
   # For our baseline model, we only consider average word length as a feature 
   # and average sentence length as a feature.
   if baseline:
