@@ -1,10 +1,12 @@
 from raw_data import *
 import sklearn
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from nltk.corpus import stopwords
 from ntlk.tokenize import word_tokenize, sent_tokenize
 import nltk
+from nltk.stem import WordNetLemmatizer 
+import contractions
 
 """
 Convert text to word vector.
@@ -30,33 +32,55 @@ Further pre-process the data to exclude stop words. Also use text tokenization
 to reduce text to tokens.
 
 Input: Flag for determining whether data is test or train.
+Output: Preprocessed text data.
 """
-def pre_processing(type="train"):
+class LemmaTokenizer:
+    def __init__(self):
+        self.wnl = WordNetLemmatizer()
+    def __call__(self, doc):
+      return [self.wnl.lemmatize(t) for t in word_tokenize(doc)]
+
+def text_pre_processing(type="train"):
   data = None
 
   if type == "train":
-    data = train_data()
+    data = text_train_data()
   elif type == "test":
-    data = test_data()
+    data = text_test_data()
 
-  # Remove contractions from data
+  for i in range(data.shape[1]):
+    excerpt = data[i]
 
+    # Remove contractions from data
+    excerpt = contractions.fix(excerpt)
 
-  # Convert all text to be lower case 
+    # Convert all text to be lower case 
+    excerpt = excerpt.lower()
 
-  # Remove stopwords
+    # Remove stopwords
+    stop_words = set(stopwords.words("english"))
+    words = excerpt.split()
+    excerpt = "".join([word for word in words if word not in stop_words])
 
-  # Proceed with Lemmatization
+    data[i] = excerpt
+
+  # Create feature vector based on word counts
+  # Let vocabulary consist of stems and lemmas
+  tfidf = TfidfVectorizer(tokenizer=LemmaTokenizer, 
+                          max_features=2000)
+
+  data = tfidf.fit_transform(data)
+
+  return data
 
 """
 Create 2 new features, average word length and average sentence length, using
 the text excerpt data. 
 """
-def create_new_features(function):
+def create_new_features(type="train"):
   # First, get all the data
   # Save the new data
-  all_data = function()
-  data_excerpts = all_data[:, 14]
+  data_excerpts = text_pre_processing(type)
 
   avg_word_length = []
   avg_sentence_length = []
@@ -76,7 +100,12 @@ def create_new_features(function):
   # Create a numpy array with the average word length as a column,
   # the average sentence length as a column,
   # and bt-easiness as the third column
-  bt_easiness = bt_easiness_train_data()
+  bt_easiness = None
+  if type == "train":
+    bt_easiness = bt_easiness_train_data()
+  elif type == "test":
+    bt_easiness = bt_easiness_test_data()
+
   features_arr = np.column_stack((avg_word_length, avg_sentence_length, bt_easiness))
   return features_arr
 

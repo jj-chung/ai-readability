@@ -1,8 +1,8 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error
 import json
-from data_processing import create_new_features
-from data_processing import train_data
+from raw_data import create_new_features
+from raw_data import train_data
 import matplotlib.pyplot as plt
 
 def train_nn(X, y):
