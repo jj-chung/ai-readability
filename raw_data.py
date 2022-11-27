@@ -1,11 +1,5 @@
 import pandas as pd 
 import numpy as np
-import sklearn
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from nltk.corpus import stopwords
-from ntlk.tokenize import word_tokenize, sent_tokenize
-import nltk
 
 """
 Return all data available (test and train).
