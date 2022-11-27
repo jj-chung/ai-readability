@@ -62,36 +62,31 @@ def cefr_baseline():
   data = cefr_train()
   X = data[:, [0, 1]]
   y = data[:, 2]
-  reg = train_linear_regression(X, y)
-  preds = predict_linear_regression(reg, X, y)
-
-  return preds
+  return regression(X, y)
 
 """
   Run the regression on train data for average word length and average
-  sentence length. One baseline.
+  sentence length (baseline) and other features (non-baseline).
 """
-def sentence_word_len_baseline():
-  data = create_new_features()
-  X = data[:, [0, 1]]
-  y = data[:, 2]
-  reg = train_linear_regression(X, y)
-  preds = predict_linear_regression(reg, X, y)
-
-  return preds
+def sentence_word_len(baseline=False):
+  data = create_new_features("train", baseline)
+  X = data[:, :-1]
+  y = data[:, -1]
+  return regression(X, y)
 
 """
   Run regression with the bag-of-words representation.
 """
 def bag_of_words_regression():
-  X_data = text_pre_processing()
-  X = X_data
+  X = word_vectorizer_train()
   y = bt_easiness_train_data()
+  return regression(X, y)
 
+def regression(X, y):
   train_errs = []
   val_errs = []
   kf = KFold(n_splits = 5)
-  
+
   for train_idx, val_idx in kf.split(X):
     X_train, X_val = X[train_idx], X[val_idx]
     y_train, y_val = y[train_idx], y[val_idx]
@@ -106,7 +101,7 @@ def bag_of_words_regression():
   return "Avg train err: {}, Avg val err: {}".format(np.average(train_errs), np.average(val_errs))
 
 if __name__ == "__main__":
-    print(bag_of_words_regression())
+    print(sentence_word_len())
 
     # Create a plot of CEFR data against BT_easiness with the regression line
     # create_plot(X, y, preds)
