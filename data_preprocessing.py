@@ -12,7 +12,7 @@ from nltk.stem import WordNetLemmatizer
 import contractions
 import spacy
 from spacy_syllables import SpacySyllables
-import en_core_web_sm
+#import en_core_web_sm
 
 """
 Convert text to word vector.

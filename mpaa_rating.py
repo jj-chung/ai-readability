@@ -80,13 +80,13 @@ if __name__ == "__main__":
   #https://iq.opengenus.org/text-classification-using-k-nearest-neighbors/
 
   #---Vectorizing Data---
-  words = data_preprocessing.word_vectorizer_train(type="train")
-  mpaa_ratings = raw_data.mpaa_train_data()
-  test_train = data_preprocessing.word_vectorizer_train(type="test")
-  test_target = raw_data.mpaa_test_data()
+  train_vector = data_preprocessing.word_vectorizer_train(type="train")
+  train_labels = raw_data.mpaa_train_data()
+  test_vector = data_preprocessing.word_vectorizer_train(type="test")
+  test_labels = raw_data.mpaa_test_data()
 
   # --- KNN ---
-  '''predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+  predicted, accuracy = trained_KNN_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
   print(predicted)
   y_true = raw_data.mpaa_test_data().astype(int)
   print(y_true)
@@ -97,10 +97,10 @@ if __name__ == "__main__":
   cm_display.plot()
   plt.rcParams.update({'font.size': 33})
   plt.show()
-  print("ur knn accuracy is:", accuracy)'''
+  print("ur knn accuracy is:", accuracy)
 
   # --- Naive Bayes ---
-  '''predicted_NB, accuracy_NB = trained_NB_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+  predicted_NB, accuracy_NB = trained_NB_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
   print("ur NB accuracy is: ", accuracy_NB)
   #2nd confusion matrix for NB
   matrix = sklearn.metrics.confusion_matrix(y_true, predicted_NB)
@@ -108,8 +108,8 @@ if __name__ == "__main__":
   cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
   cm_display.plot()
   plt.rcParams.update({'font.size': 33})
-  plt.show()'''
+  plt.show()
 
   #--- SVM ---
-  predicted_SVM, accuracy_SVM = trained_SVM_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
-  print("SVM: ", predicted_SVM, accuracy_SVM)
+  predicted_SVM, accuracy_SVM = trained_SVM_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
+  print("SVM: ", accuracy_SVM)
