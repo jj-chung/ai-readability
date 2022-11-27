@@ -65,8 +65,8 @@ def text_pre_processing(type="train"):
 
     # Remove stopwords
     stop_words = set(stopwords.words("english"))
-    words = excerpt.split()
-    excerpt = "".join([word for word in words if word not in stop_words])
+    words = excerpt.split(' ')
+    excerpt = " ".join([word for word in words if word not in stop_words])
 
     data[i] = excerpt
 
@@ -90,8 +90,10 @@ def create_new_features(type="train", baseline=True):
   nlp.add_pipe("syllables", after="tagger")
 
   for excerpt in data_excerpts:
+    print(excerpt)
     # Compute average word length for the excerpt
-    words = excerpt.split()
+    words = excerpt.split(' ')
+    print(words)
 
     total_avg = sum( map(len, words) ) / len(words)
     avg_word_length.append(total_avg)
@@ -108,9 +110,11 @@ def create_new_features(type="train", baseline=True):
     unique_word_ct.append(len(set(words)))
 
     # Consider the average number of syllables
-    doc = nlp("excerpt")
+    doc = nlp(excerpt)
     syllables_list = [token._.syllables_count for token in doc]
-    avg_syllables.append(np.average(syllables_list))
+    print(words)
+    print(syllables_list)
+    avg_syllables.append(np.average(np.array(syllables_list)))
 
   # Create a numpy array with the average word length as a column,
   # the average sentence length as a column,
@@ -122,6 +126,8 @@ def create_new_features(type="train", baseline=True):
   elif type == "test":
     bt_easiness = bt_easiness_test_data()
 
+  print(unique_word_ct)
+  print(avg_syllables)
   # For our baseline model, we only consider average word length as a feature 
   # and average sentence length as a feature.
   if baseline:
