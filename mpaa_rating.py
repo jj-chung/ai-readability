@@ -16,8 +16,8 @@ from sklearn.metrics import f1_score
 from sklearn.svm import SVC
 
 def trained_SVM_model(word_vectors, mpaa_ratings, test_train, test_target):
-  param_grid = ({ 'C':[0.1,1,100,1000],'kernel':['rbf','poly','sigmoid','linear'],
-                 'degree':[1,2,3,4,5,6],'gamma': [1, 0.1, 0.01, 0.001, 0.0001]})
+  param_grid = ({ 'C':[0.1,1,100],'kernel':['rbf','poly','sigmoid','linear'],
+                 'degree':[1,2,3],'gamma': [1, 0.1, 0.01, 0.001]})
   grid = GridSearchCV(SVC(), param_grid)
 
   model = grid.fit(word_vectors, mpaa_ratings)
@@ -79,9 +79,9 @@ if __name__ == "__main__":
   #https://iq.opengenus.org/text-classification-using-k-nearest-neighbors/
 
   # Vectorizing data
-  words = data_processing.word_vectorizer()
+  words = data_processing.word_vectorizer_train()
   mpaa_ratings = data_processing.mpaa_train_data()
-  test_train = data_processing.word_vectorizer2()
+  test_train = data_processing.word_vectorizer_test()
   test_target = data_processing.mpaa_test_data()
 
   # --- KNN ---
