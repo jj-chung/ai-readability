@@ -56,18 +56,20 @@ if __name__ == "__main__":
     # predict_linear_regression(reg, X, y)
 
     # Run the regression on train data for avg word length and avg sentence length
-    data = text_pre_processing()
-    X = data[:, [0, 1]]
-    y = data[:, 2]
+    X_data = text_pre_processing()
+    X = X_data
+    y = bt_easiness_train_data()
     reg = train_linear_regression(X, y)
     preds = predict_linear_regression(reg, X, y)
 
     # Run the regression on train data for the CEFR ratings 
+    """
     data = text_pre_processing()
     X = data[:, [0, 1]]
     y = data[:, 2]
     reg = train_linear_regression(X, y)
     preds = predict_linear_regression(reg, X, y)
+    """
     
     # Create a plot of CEFR data against BT_easiness with the regression line
-    create_plot(X, y, preds)
+    # create_plot(X, y, preds)

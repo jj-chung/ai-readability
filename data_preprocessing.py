@@ -3,8 +3,11 @@ import sklearn
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from nltk.corpus import stopwords
-from ntlk.tokenize import word_tokenize, sent_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize
 import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
 from nltk.stem import WordNetLemmatizer 
 import contractions
 
@@ -48,7 +51,7 @@ def text_pre_processing(type="train"):
   elif type == "test":
     data = text_test_data()
 
-  for i in range(data.shape[1]):
+  for i in range(data.shape[0]):
     excerpt = data[i]
 
     # Remove contractions from data
@@ -66,8 +69,8 @@ def text_pre_processing(type="train"):
 
   # Create feature vector based on word counts
   # Let vocabulary consist of stems and lemmas
-  tfidf = TfidfVectorizer(tokenizer=LemmaTokenizer, 
-                          max_features=2000)
+  tfidf = TfidfVectorizer(tokenizer=LemmaTokenizer(), 
+                         max_features=2000)
 
   data = tfidf.fit_transform(data)
 
@@ -113,4 +116,4 @@ if __name__ == "__main__":
   # print(test_data())
   # print(train_data())
   # print(text_train_data())
-  print(create_new_features(train_data))
+  # print(create_new_features(train_data))
