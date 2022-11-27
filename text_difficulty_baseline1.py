@@ -1,6 +1,6 @@
 import numpy as np 
 import js2py
-from data_processing import train_data, test_data
+from raw_data import train_data, test_data
 
 # THIS CODE DOESN"T DO ANYTHING RN
 
