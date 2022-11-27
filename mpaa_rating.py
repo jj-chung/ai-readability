@@ -78,22 +78,14 @@ if __name__ == "__main__":
   print(mpaa_ratings.astype(int))'''
   #https://iq.opengenus.org/text-classification-using-k-nearest-neighbors/
 
-<<<<<<< HEAD
+  #---Vectorizing Data---
   words = raw_data.word_vectorizer()
   mpaa_ratings = raw_data.mpaa_train_data()
   test_train = raw_data.word_vectorizer2()
   test_target = raw_data.mpaa_test_data()
-  predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
-=======
-  # Vectorizing data
-  words = data_processing.word_vectorizer_train()
-  mpaa_ratings = data_processing.mpaa_train_data()
-  test_train = data_processing.word_vectorizer_test()
-  test_target = data_processing.mpaa_test_data()
 
   # --- KNN ---
   '''predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
->>>>>>> 6a01664d4f8f6f0be546c673f6c531e7bfc0ba76
   print(predicted)
   y_true = raw_data.mpaa_test_data().astype(int)
   print(y_true)
