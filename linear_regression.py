@@ -5,6 +5,7 @@ import json
 from raw_data import *
 from data_preprocessing import *
 import matplotlib.pyplot as plt
+from sklearn.model_selection import KFold
 
 def train_linear_regression(X, y):
     reg = LinearRegression().fit(X, y)
@@ -14,7 +15,6 @@ def train_linear_regression(X, y):
 
     # Save coefficients and scores as a dictionary in file
     regression_output = {"score": score, "coeffs": coeffs.tolist(), "intercept": intercept}
-    print(regression_output)
 
     # create json object from dictionary
     json_obj = json.dumps(regression_output)
@@ -33,8 +33,8 @@ def train_linear_regression(X, y):
 def predict_linear_regression(reg, X, y):
     preds = reg.predict(X)
     model_error = mean_squared_error(y, preds)
-    print("The mean squared error of the optimal model is model_error:{}".format(model_error))
-    return preds 
+
+    return [preds, model_error] 
 
 """
   Create a scatter plot of X and y data, with y_pred determining a line.
@@ -87,10 +87,22 @@ def bag_of_words_regression():
   X_data = text_pre_processing()
   X = X_data
   y = bt_easiness_train_data()
-  reg = train_linear_regression(X, y)
-  preds = predict_linear_regression(reg, X, y)
 
-  return preds
+  train_errs = []
+  val_errs = []
+  kf = KFold(n_splits = 3)
+  for train_idx, val_idx in kf.split(X):
+    X_train, X_val = X[train_idx], X[val_idx]
+    y_train, y_val = y[train_idx], y[val_idx]
+
+    reg = train_linear_regression(X_train, y_train)
+    train_preds, train_err = predict_linear_regression(reg, X_train, y_train)
+    val_preds, val_err = predict_linear_regression(reg, X_val, y_val)
+
+    train_errs.append(train_err)
+    val_errs.append(val_err)
+  
+  return "Avg train err: {}, Avg val err: {}".format(np.average(train_errs), np.average(val_errs))
 
 if __name__ == "__main__":
     print(bag_of_words_regression())

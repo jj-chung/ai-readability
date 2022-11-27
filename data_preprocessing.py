@@ -112,7 +112,7 @@ def create_new_features(type="train"):
   features_arr = np.column_stack((avg_word_length, avg_sentence_length, bt_easiness))
   return features_arr
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
   # print(test_data())
   # print(train_data())
   # print(text_train_data())
