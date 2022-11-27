@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix
+import data_preprocessing
 import raw_data
 from sklearn import metrics
 from sklearn.datasets import fetch_20newsgroups
@@ -79,9 +80,9 @@ if __name__ == "__main__":
   #https://iq.opengenus.org/text-classification-using-k-nearest-neighbors/
 
   #---Vectorizing Data---
-  words = raw_data.word_vectorizer()
+  words = data_preprocessing.word_vectorizer_train(type="train")
   mpaa_ratings = raw_data.mpaa_train_data()
-  test_train = raw_data.word_vectorizer2()
+  test_train = data_preprocessing.word_vectorizer_train(type="test")
   test_target = raw_data.mpaa_test_data()
 
   # --- KNN ---
