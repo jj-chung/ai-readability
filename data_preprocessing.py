@@ -52,6 +52,9 @@ def text_pre_processing(type="train"):
     data = text_test_data()
 
   for i in range(data.shape[0]):
+    if i % 100 == 0:
+      print(i)
+
     excerpt = data[i]
 
     # Remove contractions from data
@@ -123,10 +126,12 @@ def create_new_features(type="train", baseline=True):
   # and average sentence length as a feature.
   if baseline:
     features_arr = np.column_stack((avg_word_length, avg_sentence_length, bt_easiness))
+    print(features_arr.shape)
     return features_arr
   
   features_arr = np.column_stack((avg_word_length, avg_sentence_length,  
     unique_word_ct, avg_syllables, bt_easiness))
+  print(features_arr.shape)
   return features_arr
 
 

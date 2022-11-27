@@ -68,7 +68,7 @@ def cefr_baseline():
   Run the regression on train data for average word length and average
   sentence length (baseline) and other features (non-baseline).
 """
-def sentence_word_len(baseline=False):
+def sentence_word_len(baseline):
   data = create_new_features("train", baseline)
   X = data[:, :-1]
   y = data[:, -1]
@@ -101,7 +101,8 @@ def regression(X, y):
   return "Avg train err: {}, Avg val err: {}".format(np.average(train_errs), np.average(val_errs))
 
 if __name__ == "__main__":
-    print(sentence_word_len())
+    print(sentence_word_len(True))
+    print(sentence_word_len(False))
 
     # Create a plot of CEFR data against BT_easiness with the regression line
     # create_plot(X, y, preds)
