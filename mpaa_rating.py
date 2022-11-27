@@ -13,6 +13,16 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
+from sklearn.svm import SVC
+
+def trained_SVM_model(word_vectors, mpaa_ratings, test_train, test_target):
+  param_grid = ({ 'C':[0.1,1,100,1000],'kernel':['rbf','poly','sigmoid','linear'],
+                 'degree':[1,2,3,4,5,6],'gamma': [1, 0.1, 0.01, 0.001, 0.0001]})
+  grid = GridSearchCV(SVC(), param_grid)
+
+  model = grid.fit(word_vectors, mpaa_ratings)
+  predict_test = model.predict(test_train)
+  return predict_test, np.mean(predict_test == test_target)*100
 
 def trained_NB_model(word_vectors, mpaa_ratings, test_train, test_target):
   model = MultinomialNB().fit(word_vectors, mpaa_ratings)
@@ -68,22 +78,28 @@ if __name__ == "__main__":
   print(mpaa_ratings.astype(int))'''
   #https://iq.opengenus.org/text-classification-using-k-nearest-neighbors/
 
+  # Vectorizing data
   words = data_processing.word_vectorizer()
   mpaa_ratings = data_processing.mpaa_train_data()
   test_train = data_processing.word_vectorizer2()
   test_target = data_processing.mpaa_test_data()
-  predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+
+  # --- KNN ---
+  '''predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
   print(predicted)
   y_true = data_processing.mpaa_test_data().astype(int)
   print(y_true)
-  '''matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
+  #1st confusion matrix for KNN
+  matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
   label_font = {'size': '18'}
   cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
   cm_display.plot()
   plt.rcParams.update({'font.size': 33})
-  plt.show()'''
-  print("ur knn accuracy is:", accuracy)
-  predicted_NB, accuracy_NB = trained_NB_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+  plt.show()
+  print("ur knn accuracy is:", accuracy)'''
+
+  # --- Naive Bayes ---
+  '''predicted_NB, accuracy_NB = trained_NB_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
   print("ur NB accuracy is: ", accuracy_NB)
   #2nd confusion matrix for NB
   matrix = sklearn.metrics.confusion_matrix(y_true, predicted_NB)
@@ -91,4 +107,8 @@ if __name__ == "__main__":
   cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
   cm_display.plot()
   plt.rcParams.update({'font.size': 33})
-  plt.show()
+  plt.show()'''
+
+  #--- SVM ---
+  predicted_SVM, accuracy_SVM = trained_SVM_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+  print("SVM: ", predicted_SVM, accuracy_SVM)
