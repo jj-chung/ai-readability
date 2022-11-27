@@ -85,7 +85,7 @@ def bt_easiness_test_data():
 Convert training text to word vector
 """
 
-def word_vectorizer():
+def word_vectorizer_train():
   text = text_train_data()
   count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=2000)
   X_train_counts = count_vect.fit_transform(text)
@@ -97,13 +97,13 @@ def word_vectorizer():
 Convert test text to word vector
 """
 
-def word_vectorizer2():
+def word_vectorizer_test():
   text = text_test_data()
   count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=2000)
-  X_train_counts = count_vect.fit_transform(text)
+  X_test_counts = count_vect.fit_transform(text)
   tfidf_transformer = TfidfTransformer()
-  X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
-  return X_train_tfidf
+  X_test_tfidf = tfidf_transformer.fit_transform(X_test_counts)
+  return X_test_tfidf
 
 
 """
