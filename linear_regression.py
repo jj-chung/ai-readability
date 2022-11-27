@@ -30,13 +30,21 @@ def train_linear_regression(X, y):
 
     return reg
 
-
 def predict_linear_regression(reg, X, y):
     preds = reg.predict(X)
     model_error = mean_squared_error(y, preds)
     print("The mean squared error of the optimal model is model_error:{}".format(model_error))
     return preds 
 
+"""
+  Create a scatter plot of X and y data, with y_pred determining a line.
+  Input: 
+    X - x value vector
+    y - y value vector
+    y_pred - prediction values vector
+  Output:
+    None
+"""
 def create_plot(X, y, y_pred):
   plt.scatter(X, y, color="black")
   plt.plot(X, y_pred, color="blue", linewidth=2)
@@ -47,29 +55,45 @@ def create_plot(X, y, y_pred):
 
   plt.show()
 
+"""
+  Run the regression on train data for the CEFR ratings. One baseline.
+"""
+def cefr_baseline():
+  data = cefr_train()
+  X = data[:, [0, 1]]
+  y = data[:, 2]
+  reg = train_linear_regression(X, y)
+  preds = predict_linear_regression(reg, X, y)
+
+  return preds
+
+"""
+  Run the regression on train data for average word length and average
+  sentence length. One baseline.
+"""
+def sentence_word_len_baseline():
+  data = create_new_features()
+  X = data[:, [0, 1]]
+  y = data[:, 2]
+  reg = train_linear_regression(X, y)
+  preds = predict_linear_regression(reg, X, y)
+
+  return preds
+
+"""
+  Run regression with the bag-of-words representation.
+"""
+def bag_of_words_regression():
+  X_data = text_pre_processing()
+  X = X_data
+  y = bt_easiness_train_data()
+  reg = train_linear_regression(X, y)
+  preds = predict_linear_regression(reg, X, y)
+
+  return preds
 
 if __name__ == "__main__":
-    # X = np.array([[1, 1], [1, 2], [2, 2], [2, 3]])
-    # y = 1 * x_0 + 2 * x_1 + 3
-    # y = np.dot(X, np.array([1, 2])) + 3
-    # reg = train_linear_regression(X, y)
-    # predict_linear_regression(reg, X, y)
+    print(bag_of_words_regression())
 
-    # Run the regression on train data for avg word length and avg sentence length
-    X_data = text_pre_processing()
-    X = X_data
-    y = bt_easiness_train_data()
-    reg = train_linear_regression(X, y)
-    preds = predict_linear_regression(reg, X, y)
-
-    # Run the regression on train data for the CEFR ratings 
-    """
-    data = text_pre_processing()
-    X = data[:, [0, 1]]
-    y = data[:, 2]
-    reg = train_linear_regression(X, y)
-    preds = predict_linear_regression(reg, X, y)
-    """
-    
     # Create a plot of CEFR data against BT_easiness with the regression line
     # create_plot(X, y, preds)
