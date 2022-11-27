@@ -89,6 +89,7 @@ def create_new_features(type="train", baseline=True):
 
   nlp = spacy.load("en_core_web_sm")
   nlp.add_pipe("syllables", after="tagger")
+  nlp.add_pipe('sentencizer')
 
   for i in range(data_excerpts.shape[0]):
     excerpt = data_excerpts[i]
@@ -105,9 +106,6 @@ def create_new_features(type="train", baseline=True):
     avg_word_length.append(total_avg)
 
     # Compute average sentence length for the excerpt
-    nlp = English()
-    nlp.add_pipe('sentencizer')
-
     sentences = [sent for sent in doc.sents]
 
     total_avg = sum( map(len, sentences) ) / len(sentences)
