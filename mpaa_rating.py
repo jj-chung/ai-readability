@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix
-import data_processing
+import raw_data
 from sklearn import metrics
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
@@ -78,6 +78,13 @@ if __name__ == "__main__":
   print(mpaa_ratings.astype(int))'''
   #https://iq.opengenus.org/text-classification-using-k-nearest-neighbors/
 
+<<<<<<< HEAD
+  words = raw_data.word_vectorizer()
+  mpaa_ratings = raw_data.mpaa_train_data()
+  test_train = raw_data.word_vectorizer2()
+  test_target = raw_data.mpaa_test_data()
+  predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+=======
   # Vectorizing data
   words = data_processing.word_vectorizer_train()
   mpaa_ratings = data_processing.mpaa_train_data()
@@ -86,8 +93,9 @@ if __name__ == "__main__":
 
   # --- KNN ---
   '''predicted, accuracy = trained_KNN_model(words, mpaa_ratings.astype(int), test_train, test_target.astype(int))
+>>>>>>> 6a01664d4f8f6f0be546c673f6c531e7bfc0ba76
   print(predicted)
-  y_true = data_processing.mpaa_test_data().astype(int)
+  y_true = raw_data.mpaa_test_data().astype(int)
   print(y_true)
   #1st confusion matrix for KNN
   matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
