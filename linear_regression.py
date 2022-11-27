@@ -90,7 +90,8 @@ def bag_of_words_regression():
 
   train_errs = []
   val_errs = []
-  kf = KFold(n_splits = 3)
+  kf = KFold(n_splits = 5)
+  
   for train_idx, val_idx in kf.split(X):
     X_train, X_val = X[train_idx], X[val_idx]
     y_train, y_val = y[train_idx], y[val_idx]
