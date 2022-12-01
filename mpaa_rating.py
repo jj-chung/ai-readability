@@ -5,7 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix
 import data_preprocessing
-import raw_data
+import imbalanced
 from sklearn import metrics
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import CountVectorizer
@@ -15,6 +15,9 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
 from sklearn.svm import SVC
+from sklearn.ensemble import AdaBoostClassifier
+
+DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ROS', 'SMOTE', 'SMOTETomek']
 
 def trained_SVM_model(word_vectors, mpaa_ratings, test_train, test_target):
   param_grid = ({ 'C':[0.1,1,100],'kernel':['rbf','poly','sigmoid','linear'],
@@ -23,12 +26,22 @@ def trained_SVM_model(word_vectors, mpaa_ratings, test_train, test_target):
 
   model = grid.fit(word_vectors, mpaa_ratings)
   predict_test = model.predict(test_train)
-  return predict_test, np.mean(predict_test == test_target)*100
+  return (
+      predict_test, 
+      accuracy_score(test_target, predict_test), 
+      f1_score(test_target, predict_test, average='weighted'),
+      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for i, x in enumerate(test_target) if x == 3)
+    )
 
 def trained_NB_model(word_vectors, mpaa_ratings, test_train, test_target):
   model = MultinomialNB().fit(word_vectors, mpaa_ratings)
   predict_test = model.predict(test_train)
-  return predict_test, np.mean(predict_test == test_target)*100
+  return (
+      predict_test, 
+      accuracy_score(test_target, predict_test), 
+      f1_score(test_target, predict_test, average='weighted'),
+      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for i, x in enumerate(test_target) if x == 3)
+    )
 
 def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
   # List Hyperparameters that we want to tune
@@ -56,11 +69,47 @@ def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
   predict_test = clf.predict(test_train)
   # return the best model
   #return accuracy rate
-  return predict_test, np.mean(predict_test == test_target)*100
+  return (
+      predict_test, 
+      accuracy_score(test_target, predict_test), 
+      f1_score(test_target, predict_test, average='weighted'),
+      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for x in test_target if x == 3)
+    )
 
+def trained_Adaboost_model(word_vectors, mpaa_ratings, test_train, test_target, estimator = None):
+    model = AdaBoostClassifier(base_estimator = estimator, n_estimators=100, random_state=42).fit(word_vectors, mpaa_ratings)
+    predict_test = model.predict(test_train)
+    return (
+      predict_test, 
+      accuracy_score(test_target, predict_test), 
+      f1_score(test_target, predict_test, average='weighted'),
+      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for i, x in enumerate(test_target) if x == 3)
+    )
 
-def plot_scores(clf):
-  scores = clf.cv_results_
+# given data and a model, it runs the things, returns the things, and displays a confusian matrix if you ask nicely
+def run_model(train_vector, train_labels, test_vector, test_labels, model, conf_matrix = None):
+  if model == 'knn':
+    output = trained_KNN_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
+  elif model == 'nb':
+    output = trained_NB_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
+  elif model == 'svm':
+    output = trained_SVM_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
+  elif model == 'adaboost':
+    output = trained_Adaboost_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
+  elif model == 'adaboost_nb': 
+    output = trained_Adaboost_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int), estimator = MultinomialNB())
+
+  predicted = output[0]
+  # print(predicted)
+
+  if not not conf_matrix:
+    matrix = sklearn.metrics.confusion_matrix(test_labels, predicted)
+    cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "Mature"])
+    cm_display.plot()
+    plt.rcParams.update({'font.size': 33})
+    plt.title(conf_matrix)
+    plt.show()
+  return {'accuracy': output[1], 'f1': output[2], 'accuray for true mature': output[3]}
 
 if __name__ == "__main__":
   '''word_vectors = [["hello"], ["hi"], ["hey"], ["amaa"], ["damn"], ["six"]]
@@ -81,35 +130,39 @@ if __name__ == "__main__":
 
   #---Vectorizing Data---
   train_vector = data_preprocessing.word_vectorizer_train(type="train")
-  train_labels = raw_data.mpaa_train_data()
+  train_labels = data_preprocessing.mpaa_pre_processing(type="train")
   test_vector = data_preprocessing.word_vectorizer_train(type="test")
-  test_labels = raw_data.mpaa_test_data()
+  test_labels = data_preprocessing.mpaa_pre_processing(type="test")
+
+  #---Resampled Data---
+  x_rus, y_rus = imbalanced.RUS(train_vector, train_labels)
+  x_tl, y_tl = imbalanced.TLinks(train_vector, train_labels)
+  x_ros, y_ros = imbalanced.ROS(train_vector, train_labels)
+  x_sm, y_sm = imbalanced.SMOTE_Reg(train_vector, train_labels)
+  x_smt, y_smt = imbalanced.SMOTE_TL(train_vector, train_labels)
+
+  all_data = [(train_vector, train_labels), (x_rus, y_rus), (x_tl, y_tl), (x_ros, y_ros), (x_sm, y_sm), (x_smt, y_smt)]
+
+  x_en, y_en = imbalanced.ENN(train_vector, train_labels)
 
   # --- KNN ---
-  predicted, accuracy = trained_KNN_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
-  print(predicted)
-  y_true = raw_data.mpaa_test_data().astype(int)
-  print(y_true)
-  #1st confusion matrix for KNN
-  matrix = sklearn.metrics.confusion_matrix(y_true, predicted)
-  label_font = {'size': '18'}
-  cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
-  cm_display.plot()
-  plt.rcParams.update({'font.size': 33})
-  plt.show()
-  print("ur knn accuracy is:", accuracy)
+  #if you want a confusion matrix, set 'conf_matrix' param to data_set
+  # for i, data_set in enumerate(DATA_SETS):
+    # print(f"ur {data_set} knn accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'knn', conf_matrix = None))
 
   # --- Naive Bayes ---
-  predicted_NB, accuracy_NB = trained_NB_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
-  print("ur NB accuracy is: ", accuracy_NB)
-  #2nd confusion matrix for NB
-  matrix = sklearn.metrics.confusion_matrix(y_true, predicted_NB)
-  label_font = {'size': '18'}
-  cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "PG-13", "R"])
-  cm_display.plot()
-  plt.rcParams.update({'font.size': 33})
-  plt.show()
+  # print(f"ur enn nb accuracy is:", run_model(x_en, y_en, test_vector, test_labels, 'nb', conf_matrix = 'enn'))
+  for i, data_set in enumerate(DATA_SETS):
+    print(f"ur {data_set} nb accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'nb', conf_matrix = data_set))
 
   #--- SVM ---
-  predicted_SVM, accuracy_SVM = trained_SVM_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
-  print("SVM: ", accuracy_SVM)
+  # for i, data_set in enumerate(DATA_SETS):
+    # print(f"ur {data_set} svm accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'svm', conf_matrix = None))
+  
+  # --- Adaboost ---
+  for i, data_set in enumerate(DATA_SETS):
+    print(f"ur {data_set} ab accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'adaboost', conf_matrix = data_set))
+  
+  # --- Adaboost + NB ---
+  for i, data_set in enumerate(DATA_SETS):
+    print(f"ur {data_set} ab/nb accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'adaboost_nb', conf_matrix = data_set))
