@@ -22,9 +22,16 @@ DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ROS', 'SMOTE', 'SMOTETomek']
 def trained_SVM_model(word_vectors, mpaa_ratings, test_train, test_target):
   param_grid = ({ 'C':[0.1,1,100],'kernel':['rbf','poly','sigmoid','linear'],
                  'degree':[1,2,3],'gamma': [1, 0.1, 0.01, 0.001]})
-  grid = GridSearchCV(SVC(), param_grid)
+  svm = sklearn.svm.SVC()
+  grid = GridSearchCV(svm, param_grid)
 
   model = grid.fit(word_vectors, mpaa_ratings)
+  #print best hyperparams
+  print('Best C:', grid.best_estimator_.get_params()['C'])
+  print('Best kernel:', grid.best_estimator_.get_params()['kernel'])
+  print('Best degree:', grid.best_estimator_.get_params()['degree'])
+  print('Best gamma:', grid.best_estimator_.get_params()['gamma'])
+
   predict_test = model.predict(test_train)
   return (
       predict_test, 

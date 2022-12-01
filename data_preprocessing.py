@@ -30,8 +30,9 @@ def word_vectorizer_train(type="train"):
 
   text = text_pre_processing(type)
 
-  count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=2000)
+  count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=20000)
   X_train_counts = count_vect.fit_transform(text)
+  #print('vect_length: ', X_train_counts.shape[0], X_train_counts.shape[1], X_train_counts)
   tfidf_transformer = TfidfTransformer()
   X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
   return X_train_tfidf
