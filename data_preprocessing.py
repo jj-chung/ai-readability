@@ -78,6 +78,17 @@ def text_pre_processing(type="train"):
 
   return data
 
+def mpaa_pre_processing(type="train"):
+  data = None
+
+  if type == "train":
+    data = mpaa_train_data()
+  elif type == "test":
+    data = mpaa_test_data()
+  
+  # merge R and PG-13
+  return np.array(list(map(lambda x: 3 if x == 4 else x, data)))
+
 """
 Create 2 new features, average word length and average sentence length, using
 the text excerpt data. 
