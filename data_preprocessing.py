@@ -14,6 +14,11 @@ import spacy
 from spacy_syllables import SpacySyllables
 from spacy.lang.en import English
 from spacy.pipeline import Sentencizer
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+import random
 
 """
 Convert text to word vector.
@@ -143,9 +148,43 @@ def create_new_features(type="train", baseline=True):
   print(features_arr.shape)
   return features_arr
 
+def find_stopwords_overlap():
+  set1 = set(stopwords.words("english"))
+  en = spacy.load("en_core_web_sm")
+  set2 = set(en.Defaults.stop_words)
 
-# if __name__ == "__main__":
-  # print(test_data())
-  # print(train_data())
-  # print(text_train_data())
-  # print(create_new_features(train_data))
+  return len(set1.intersection(set2))
+
+def color_func(word, font_size, position, orientation, random_state=None,
+                    **kwargs):
+    nltk_stopwords = stopwords.words("english")
+    if word in nltk_stopwords:
+      return "hsl(110, 100%, 0%)"
+    else:
+      return "hsl(110, 100%%, %d%%)" % 40
+
+def visualize_stopwords():
+  text_arr = text_train_data()
+  combined_text = ""
+
+  for elem in text_arr:
+    combined_text += elem
+
+  wordcloud = WordCloud(width = 800, height = 600,
+                background_color ='white',
+                stopwords = [],
+                min_font_size = 10).generate(combined_text)
+
+  wordcloud = wordcloud.recolor(color_func=color_func, random_state=3)
+
+  # plot the WordCloud image                      
+  plt.figure(figsize = (8, 8), facecolor = None)
+  plt.imshow(wordcloud)
+  plt.axis("off")
+  plt.tight_layout(pad = 0)
+  
+  plt.show()
+
+if __name__ == "__main__":
+  visualize_stopwords()
+  

@@ -77,3 +77,11 @@ Return BT-easiness score for testing (numbers).
 def bt_easiness_test_data():
   array = test_data()
   return array[:, 22]
+
+if __name__ == "__main__":
+  train_data = train_data()
+  print("train")
+  print(train_data.shape)
+  test_data = test_data()
+  print("test")
+  print(test_data.shape)
