@@ -14,7 +14,7 @@ def train_nn(train_v, train_s, test_v, test_s):
     print(MLPRegressor().get_params().keys())
     parameters = {'batch_size': ['''20''', 32, 64, 128],
                     'max_iter': [150, 250, '''400'''],
-                  'solver': ['adam', 'sgd'], #'lbfgs'
+                  'solver': ['sgd'], #'lbfgs', adam
                   'hidden_layer_sizes': [(1000), (1000, 1000)]}
     grid_search = GridSearchCV(estimator=MLPRegressor(),
                                param_grid=parameters,
