@@ -267,7 +267,7 @@ def resampling_method(train_vector, train_labels, model_type="svm"):
 
   DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ROS', 'SMOTE', 'SMOTETomek']
   for i, data_set in enumerate(DATA_SETS):
-    print(f"ur {data_set} ab/nb accuracy is:", train_model(all_data[i][0], all_data[i][1], test_vector, test_labels, model_type, conf_matrix = data_set))
+    print(f"ur {data_set} ab/nb accuracy is:", train_model(all_data[i][0], all_data[i][1], model_type, conf_matrix = data_set))
 
 if __name__ == "__main__":
   #---Vectorizing Data---
