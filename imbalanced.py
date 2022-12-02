@@ -6,7 +6,6 @@ from imblearn.combine import SMOTETomek, SMOTEENN
 
 # Random Under Sampling
 def RUS(X, y):
-    # sampling_dict =
     rus = RandomUnderSampler(sampling_strategy='auto')
     return rus.fit_resample(X, y.astype('int'))
 
