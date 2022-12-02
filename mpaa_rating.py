@@ -7,6 +7,7 @@ import json
 import sklearn
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import KFold
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn import metrics
@@ -23,7 +24,7 @@ word_vectors - tfidf vectorization for training data
 mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 grid_search - Boolean flag for whether or not to perform grid search here
 """
-def train_SVM_model(word_vectors, mpaa_ratings, grid_search=True):
+def train_SVM_model(word_vectors, mpaa_ratings, grid_search=True, do_k_fold=True):
   if grid_search:
     # Use gridsearch to find the optimal set of parameters
     param_grid = ({'C':[0.1,1,100],
@@ -36,18 +37,22 @@ def train_SVM_model(word_vectors, mpaa_ratings, grid_search=True):
 
   # Create SVM and GridSearch object
   svm = sklearn.svm.SVC()
-  grid = GridSearchCV(svm, param_grid)
+  clf = GridSearchCV(svm, param_grid)
 
-  # Search over the grid for optimal parameters for SVM
-  model = grid.fit(word_vectors, mpaa_ratings)
-  
-  # Save optimal parameters to JSON file
-  optim_params = grid.best_estimator_.get_params()
+  # Fit the model. If k-fold validation is specified, call the k-fold validation
+  # function fit and predict k times.
+  if do_k_fold:
+    k_fold_validation(clf, word_vectors, mpaa_ratings, model_type="SVM")
+  else:
+    model = clf.fit(word_vectors, mpaa_ratings)
 
-  with open('optimal_SVM_params.json', 'w') as fp:
-    json.dump(optim_params, fp)
+    # Save optimal parameters to JSON file
+    optim_params = model.best_estimator_.get_params()
 
-  return model
+    with open('mpaa_data/optimal_SVM_params.json', 'w') as fp:
+      json.dump(optim_params, fp)
+
+    return model
 
 """
 Train the Naive Bayes model.
@@ -55,10 +60,12 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_NB_model(word_vectors, mpaa_ratings):
-  model = MultinomialNB().fit(word_vectors, mpaa_ratings)
-
-  return model
+def train_NB_model(word_vectors, mpaa_ratings, do_k_fold=True):
+  if do_k_fold:
+    model = MultinomialNB().fit(word_vectors, mpaa_ratings)
+    return model
+  else:
+    k_fold_validation(MultinomialNB(), word_vectors, mpaa_ratings, model_type="NB")
 
 """
 Train an Adaboost model.
@@ -66,10 +73,15 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_Adaboost_model(word_vectors, mpaa_ratings, estimator = None):
-    model = AdaBoostClassifier(base_estimator = estimator, n_estimators=100, random_state=42).fit(word_vectors, mpaa_ratings)
-    
+def train_Adaboost_model(word_vectors, mpaa_ratings, estimator = None, do_k_fold=True):
+  ABClassifier = AdaBoostClassifier(base_estimator = estimator, n_estimators=100, random_state=42)
+  
+  if do_k_fold:
+    k_fold_validation(model, word_vectors, mpaa_ratings, model_type="AdaBoost")
+  else:
+    model = ABClassifier.fit(word_vectors, mpaa_ratings)
     return model
+    
 
 """
 Train the KNN model.
@@ -77,7 +89,7 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_KNN_model(word_vectors, mpaa_ratings):
+def train_KNN_model(word_vectors, mpaa_ratings, do_k_fold=True):
   # List hyperparameters that we want to tune
   leaf_size = list(range(1,9))
   n_neighbors = list(range(1,9))
@@ -92,16 +104,49 @@ def train_KNN_model(word_vectors, mpaa_ratings):
   # Use GridSearch
   clf = GridSearchCV(knn, hyperparameters, cv=2)
 
-  # Fit the model
-  model = clf.fit(word_vectors, mpaa_ratings)
+  # Fit the model. If k-fold validation is specified, call the k-fold validation
+  # function fit and predict k times.
+  if do_k_fold:
+    k_fold_validation(clf, word_vectors, mpaa_ratings, model_type="KNN")
+  else:
+    model = clf.fit(word_vectors, mpaa_ratings)
 
-  # Save optimal parameters to JSON file
-  optim_params = model.best_estimator_.get_params()
+    # Save optimal parameters to JSON file
+    optim_params = model.best_estimator_.get_params()
 
-  with open('optimal_SVM_params.json', 'w') as fp:
-    json.dump(optim_params, fp)
+    with open('mpaa_data/optimal_KNN_params.json', 'w') as fp:
+      json.dump(optim_params, fp)
 
   return model
+
+"""
+Perform k-fold validation for a model, a training dataset, and a k value.
+Input:
+  model - the model being trained on each run of k-fold-validation
+  train_vectors - the training dataset tfidf vectors
+  train_ratings - the training dataset MPAA ratings
+"""
+def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
+  X = train_vectors
+  y = train_ratings
+
+  kf = KFold(n_splits=k)
+  for train_index, test_index in kf.split(X):
+    print("TRAIN_IDX_K_FOLD:", train_index, "TEST_INDEX_K_FOLD:", test_index)
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+
+    # Train the model on the train data
+    model = clf.fit(X_train, X_test)
+
+    # Save optimal parameters to JSON file
+    optim_params = model.best_estimator_.get_params()
+    with open('mpaa_data/optimal_{}_params_{}.json'.format(model_type, k), 'w') as fp:
+      json.dump(optim_params, fp)
+
+    # Evaluate the model on the test data
+    predict_model(model, y_train, y_test, model_type="SVM", conf_matrix=True, k)
+      
 
 """
 Predict for SVM/NB/KNN/Adaboost model.
@@ -111,11 +156,13 @@ test_vectors - input tfidf vectors for the test data
 test_target - MPAA rating labels for the test data (Numbers from 1 to 4, G to R)
 model_type - string specifying whether the model is SVM, Naive Bayes, KNN, Adaboost, or something else
    MUST be included for optimal parameters to be saved correctly/not overwritten.
+conf_matrix - whether or not a confusion matrix should be generated
+k - Value of k if prediction is being used for k-fold validation
 
-IMPORTANT: DO NOT run this function until all training and validation has been completed.
-For final prediction only.
+IMPORTANT: DO NOT run this function on actual test data until all training and 
+validation has been completed.
 """
-def predict_model(model, test_vectors, test_target, model_type="SVM"):
+def predict_model(model, test_vectors, test_target, model_type="SVM", conf_matrix=True, k="N/A"):
   # Predicted MPAA ratings
   predicted_ratings = model.predict(test_vectors)
 
@@ -125,6 +172,7 @@ def predict_model(model, test_vectors, test_target, model_type="SVM"):
   total_PG_13 = test_target[PG_13_indices].shape([0])
   PG_13_correct = num_correct_PG_13 / total_PG_13
 
+  # Compute the evaluation metrics
   eval_metrics = {
       "predicted": predicted_ratings, 
       "accuracy_score" : accuracy_score(test_target, predicted_ratings), 
@@ -132,8 +180,17 @@ def predict_model(model, test_vectors, test_target, model_type="SVM"):
       "PG_13_correct": PG_13_correct
   }
       
-  with open('test_eval_metrics_{}.json'.format(model_type), 'w') as fp:
+  with open('mpaa_data/test_eval_metrics_{}.json'.format(model_type), 'w') as fp:
     json.dump(eval_metrics, fp)
+
+  # Create a confusion matrix
+  if conf_matrix:
+    matrix = confusion_matrix(test_labels, predicted_ratings)
+    cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "Mature"])
+    cm_display.plot()
+    plt.rcParams.update({'font.size': 33})
+    plt.title("Confusion Matrix for {}".format(model_type))
+    plt.savefig("images/Confusion_Matrix_{}_k={}".format(model_type, k))
 
   return eval_metrics
 
@@ -162,14 +219,6 @@ def train_model(train_vector, train_labels, model_type, conf_matrix=True):
     model = train_Adaboost_model(train_vector, train_labels.astype(int))
   elif model == 'adaboost_nb': 
     model = train_Adaboost_model(train_vector, train_labels.astype(int), estimator = MultinomialNB())
-
-  if conf_matrix:
-    matrix = sklearn.metrics.confusion_matrix(test_labels, predicted)
-    cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "Mature"])
-    cm_display.plot()
-    plt.rcParams.update({'font.size': 33})
-    plt.title(conf_matrix)
-    plt.show()
 
 """
 Resample the data to treat imbalanced classes for MPAA Ratings.
