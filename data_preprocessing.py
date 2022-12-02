@@ -189,7 +189,7 @@ def visualize_stopwords():
 
   wordcloud = wordcloud.recolor(color_func=color_func, random_state=3)
 
-  # plot the WordCloud image                      
+  # Plot the WordCloud image                      
   plt.figure(figsize = (8, 8), facecolor = None)
   plt.imshow(wordcloud)
   plt.axis("off")
