@@ -62,10 +62,11 @@ Input:
 """
 def train_NB_model(word_vectors, mpaa_ratings, do_k_fold=True):
   if do_k_fold:
-    model = MultinomialNB().fit(word_vectors, mpaa_ratings)
-    return model
-  else:
     k_fold_validation(MultinomialNB(), word_vectors, mpaa_ratings, model_type="NB")
+  else:
+    model = MultinomialNB().fit(word_vectors, mpaa_ratings)
+    # print('score:', model.score(word_vectors, mpaa_ratings))
+    return model
 
 """
 Train an Adaboost model.
@@ -139,20 +140,23 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
   }
 
   for train_index, test_index in kf.split(X):
-    print("Training on fold {}".format(fold_num))
+    print(f'Training on fold {fold_num}')
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
 
     # Train the model on the train data
     model = clf.fit(X_train, y_train)
 
-    # Save optimal parameters to JSON file
-    optim_params = model.best_estimator_.get_params()
-    with open('mpaa_data/optimal_{}_params_{}.json'.format(model_type, k), 'w') as fp:
-      json.dump(optim_params, fp)
+    try: 
+      # Save optimal parameters to JSON file
+      optim_params = model.best_estimator_.get_params()
+      with open(f'mpaa_data/optimal_{model_type}_params_{k}.json', 'w') as fp:
+        json.dump(optim_params, fp)
+    except:
+      pass
 
     # Evaluate the model on the test data
-    eval_metrics = predict_model(model, X_test, y_test, model_type="SVM", conf_matrix=True, k_val=fold_num)
+    eval_metrics = predict_model(model, X_test, y_test, model_type=model_type, conf_matrix=True, k_val=fold_num)
 
     for key in eval_metrics:
       if key in avg_eval_metrics:
@@ -160,7 +164,6 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
 
     # Add to fold variable 
     fold_num += 1
-      
   # Save avg evaluation metrics to json
   for key in avg_eval_metrics:
     values = avg_eval_metrics[key]
@@ -204,7 +207,7 @@ def predict_model(model, test_vectors, test_target, model_type="SVM", conf_matri
       "PG_13_correct": float(PG_13_correct)
   }
       
-  with open('mpaa_data/test_eval_metrics_{}_{}.json'.format(model_type, k_val), 'w') as fp:
+  with open(f'mpaa_data/test_eval_metrics_{model_type}_{k_val}.json', 'w') as fp:
     json.dump(eval_metrics, fp)
 
   # Create a confusion matrix
@@ -213,8 +216,8 @@ def predict_model(model, test_vectors, test_target, model_type="SVM", conf_matri
     cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "Mature"])
     cm_display.plot()
     plt.rcParams.update({'font.size': 20})
-    plt.title("Confusion Matrix for {}".format(model_type))
-    plt.savefig("images/Confusion_Matrix_{}_k={}".format(model_type, k_val))
+    plt.title(f"Confusion Matrix for {model_type}")
+    plt.savefig(f"images/Confusion_Matrix_{model_type}_k={k_val}")
 
   return eval_metrics
 
@@ -277,4 +280,4 @@ if __name__ == "__main__":
   test_vector = data_preprocessing.word_vectorizer_train(type="test")
   test_labels = data_preprocessing.mpaa_pre_processing(type="test")
 
-  train_model(train_vector, train_labels, "svm")
+  train_model(train_vector, train_labels, "nb")
