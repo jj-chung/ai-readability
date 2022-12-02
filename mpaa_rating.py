@@ -131,13 +131,15 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
   y = train_ratings
 
   kf = KFold(n_splits=k)
+  fold_num = 0
+
   for train_index, test_index in kf.split(X):
-    print("TRAIN_IDX_K_FOLD:", train_index, "TEST_INDEX_K_FOLD:", test_index)
+    print("Training on fold {}".format(fold_num))
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
 
     # Train the model on the train data
-    model = clf.fit(X_train, X_test)
+    model = clf.fit(X_train, y_train)
 
     # Save optimal parameters to JSON file
     optim_params = model.best_estimator_.get_params()
@@ -145,7 +147,10 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
       json.dump(optim_params, fp)
 
     # Evaluate the model on the test data
-    predict_model(model, y_train, y_test, model_type="SVM", conf_matrix=True, k)
+    predict_model(model, X_test, y_test, model_type="SVM", conf_matrix=True, k_val=k)
+
+    # Add to fold variable 
+    fold_num += 1
       
 
 """
@@ -162,35 +167,35 @@ k - Value of k if prediction is being used for k-fold validation
 IMPORTANT: DO NOT run this function on actual test data until all training and 
 validation has been completed.
 """
-def predict_model(model, test_vectors, test_target, model_type="SVM", conf_matrix=True, k="N/A"):
+def predict_model(model, test_vectors, test_target, model_type="SVM", conf_matrix=True, k_val="N/A"):
   # Predicted MPAA ratings
   predicted_ratings = model.predict(test_vectors)
 
   # Compute the number of predictions which were correct for PG-13 movies
   PG_13_indices = predicted_ratings == 3
   num_correct_PG_13 = sum(predicted_ratings[PG_13_indices] == test_target[PG_13_indices]) 
-  total_PG_13 = test_target[PG_13_indices].shape([0])
+  total_PG_13 = len(test_target == 3)
   PG_13_correct = num_correct_PG_13 / total_PG_13
 
   # Compute the evaluation metrics
   eval_metrics = {
-      "predicted": predicted_ratings, 
-      "accuracy_score" : accuracy_score(test_target, predicted_ratings), 
-      "f1_score": f1_score(test_target, predicted_ratings, average='weighted'),
-      "PG_13_correct": PG_13_correct
+      "predict_labels" : predicted_ratings.tolist(),
+      "accuracy_score" : float(accuracy_score(test_target, predicted_ratings)), 
+      "f1_score": float(f1_score(test_target, predicted_ratings, average='weighted')),
+      "PG_13_correct": float(PG_13_correct)
   }
       
-  with open('mpaa_data/test_eval_metrics_{}.json'.format(model_type), 'w') as fp:
+  with open('mpaa_data/test_eval_metrics_{}_{}.json'.format(model_type, k_val), 'w') as fp:
     json.dump(eval_metrics, fp)
 
   # Create a confusion matrix
   if conf_matrix:
-    matrix = confusion_matrix(test_labels, predicted_ratings)
+    matrix = confusion_matrix(test_target, predicted_ratings)
     cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "Mature"])
     cm_display.plot()
     plt.rcParams.update({'font.size': 33})
     plt.title("Confusion Matrix for {}".format(model_type))
-    plt.savefig("images/Confusion_Matrix_{}_k={}".format(model_type, k))
+    plt.savefig("images/Confusion_Matrix_{}_k={}".format(model_type, k_val))
 
   return eval_metrics
 
@@ -207,18 +212,20 @@ Input:
 Output:
   None.
 """
-def train_model(train_vector, train_labels, model_type, conf_matrix=True):
+def train_model(train_vector, train_labels, model_type):
   if model_type == 'knn':
     model = train_KNN_model(train_vector, train_labels.astype(int))
-  elif model == 'nb':
+  elif model_type == 'nb':
     model = train_NB_model(train_vector, train_labels.astype(int))
   elif model_type == 'svm':
     # Make sure to update grid search flag as needed
     model = train_SVM_model(train_vector, train_labels.astype(int), grid_search=False)
   elif model_type == 'adaboost':
     model = train_Adaboost_model(train_vector, train_labels.astype(int))
-  elif model == 'adaboost_nb': 
+  elif model_type == 'adaboost_nb': 
     model = train_Adaboost_model(train_vector, train_labels.astype(int), estimator = MultinomialNB())
+
+  return model
 
 """
 Resample the data to treat imbalanced classes for MPAA Ratings.
@@ -249,3 +256,5 @@ if __name__ == "__main__":
   train_labels = data_preprocessing.mpaa_pre_processing(type="train")
   test_vector = data_preprocessing.word_vectorizer_train(type="test")
   test_labels = data_preprocessing.mpaa_pre_processing(type="test")
+
+  train_model(train_vector, train_labels, "svm")
