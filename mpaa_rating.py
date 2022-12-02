@@ -60,12 +60,11 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_NB_model(word_vectors, mpaa_ratings, do_k_fold=True):
+def train_NB_model(word_vectors, mpaa_ratings, do_k_fold=False):
   if do_k_fold:
     k_fold_validation(MultinomialNB(), word_vectors, mpaa_ratings, model_type="NB")
   else:
     model = MultinomialNB().fit(word_vectors, mpaa_ratings)
-    # print('score:', model.score(word_vectors, mpaa_ratings))
     return model
 
 """
@@ -136,7 +135,7 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
   avg_eval_metrics = {
       "accuracy_score" : [],
       "f1_score": [],
-      "PG_13_correct": []
+      "Mature_correct": []
   }
 
   for train_index, test_index in kf.split(X):
@@ -193,18 +192,18 @@ def predict_model(model, test_vectors, test_target, model_type="SVM", conf_matri
   # Predicted MPAA ratings
   predicted_ratings = model.predict(test_vectors)
 
-  # Compute the number of predictions which were correct for PG-13 movies
-  PG_13_indices = predicted_ratings == 3
-  num_correct_PG_13 = sum(predicted_ratings[PG_13_indices] == test_target[PG_13_indices]) 
-  total_PG_13 = len(test_target == 3)
-  PG_13_correct = num_correct_PG_13 / total_PG_13
+  # Compute the number of predictions which were correct for Mature movies
+  Mature_indices = predicted_ratings == 3
+  num_correct_Mature = sum(predicted_ratings[Mature_indices] == test_target[Mature_indices]) 
+  total_Mature = len(test_target == 3)
+  Mature_correct = num_correct_Mature / total_Mature
 
   # Compute the evaluation metrics
   eval_metrics = {
       "predict_labels" : predicted_ratings.tolist(),
       "accuracy_score" : float(accuracy_score(test_target, predicted_ratings)), 
       "f1_score": float(f1_score(test_target, predicted_ratings, average='weighted')),
-      "PG_13_correct": float(PG_13_correct)
+      "Mature_correct": float(Mature_correct)
   }
       
   with open(f'mpaa_data/test_eval_metrics_{model_type}_{k_val}.json', 'w') as fp:
