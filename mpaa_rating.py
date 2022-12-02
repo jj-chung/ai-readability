@@ -261,11 +261,12 @@ def resampling_method(train_vector, train_labels, model_type="svm"):
   x_sm, y_sm = imbalanced.SMOTE_Reg(train_vector, train_labels)
   x_smt, y_smt = imbalanced.SMOTE_TL(train_vector, train_labels)
 
-  all_data = [(train_vector, train_labels), (x_rus, y_rus), (x_tl, y_tl), (x_ros, y_ros), (x_sm, y_sm), (x_smt, y_smt)]
-
   x_en, y_en = imbalanced.ENN(train_vector, train_labels)
 
-  DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ROS', 'SMOTE', 'SMOTETomek']
+  all_data = [(train_vector, train_labels), (x_rus, y_rus), (x_tl, y_tl), (x_en, y_en),
+    (x_ros, y_ros), (x_sm, y_sm), (x_smt, y_smt)]
+
+  DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ENN', 'ROS', 'SMOTE', 'SMOTETomek']
   for i, data_set in enumerate(DATA_SETS):
     print(f"ur {data_set} ab/nb accuracy is:", train_model(all_data[i][0], all_data[i][1], model_type, conf_matrix = True))
 
