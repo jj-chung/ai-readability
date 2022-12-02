@@ -193,7 +193,7 @@ def predict_model(model, test_vectors, test_target, model_type="SVM", conf_matri
     matrix = confusion_matrix(test_target, predicted_ratings)
     cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "Mature"])
     cm_display.plot()
-    plt.rcParams.update({'font.size': 33})
+    plt.rcParams.update({'font.size': 20})
     plt.title("Confusion Matrix for {}".format(model_type))
     plt.savefig("images/Confusion_Matrix_{}_k={}".format(model_type, k_val))
 
