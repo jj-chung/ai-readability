@@ -17,16 +17,29 @@ Return train data.
 """
 def train_data():
   all_data = get_all_data()
-  mask = (all_data[:, -1] == "Train")
-  return all_data[mask, :]
+  # mask = (all_data[:, -1] == "Train")
+  # return all_data[mask, :]
+
+  np.random.seed(123)
+  np.random.shuffle(all_data)
+  split_idx = int(0.7 * all_data.shape[0])
+  print(split_idx)
+
+  return all_data[0:split_idx, :]
 
 """
 Return test data.
 """
 def test_data():
   all_data = get_all_data()
-  mask = (all_data[:, -1] == "Test")
-  return all_data[mask, :]
+  # mask = (all_data[:, -1] == "Test")
+  # return all_data[mask, :]
+
+  np.random.seed(123)
+  np.random.shuffle(all_data)
+  split_idx = int(0.7 * all_data.shape[0])
+
+  return all_data[split_idx: , :]
 
 """
 Return the array of text excerpts for training.
