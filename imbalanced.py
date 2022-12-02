@@ -37,10 +37,10 @@ def ROS(X, y):
 
 # SMOTE
 def SMOTE_Reg(X, y):
-    sm = SMOTE(sampling_strategy='auto', random_state=42)
+    sm = SMOTE(sampling_strategy='auto')
     return sm.fit_resample(X, y.astype('int'))
 
 # SMOTE + TomekLinks
 def SMOTE_TL(X, y):
-    smt = SMOTETomek(sampling_strategy='auto', random_state=42)
+    smt = SMOTETomek(sampling_strategy='auto')
     return smt.fit_resample(X, y.astype('int'))
