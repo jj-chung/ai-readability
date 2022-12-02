@@ -130,7 +130,7 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, data_type, 
   X = train_vectors
   y = train_ratings
 
-  kf = KFold(n_splits=k)
+  kf = KFold(n_splits=k, shuffle=True)
   fold_num = 0
   avg_eval_metrics = {
       "accuracy_score" : [],
