@@ -1,57 +1,84 @@
 import numpy as np
-import sklearn
 import matplotlib.pyplot as plt
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import confusion_matrix, plot_confusion_matrix
 import data_preprocessing
 import imbalanced
-from sklearn import metrics
-from sklearn.datasets import fetch_20newsgroups
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
+import json
+
+import sklearn
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import f1_score
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, f1_score
 from sklearn.svm import SVC
 from sklearn.ensemble import AdaBoostClassifier
 
-DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ROS', 'SMOTE', 'SMOTETomek']
+"""
+Training the SVM model using gridsearch. 
 
-def trained_SVM_model(word_vectors, mpaa_ratings, test_train, test_target):
-  param_grid = ({ 'C':[0.1,1,100],'kernel':['rbf','poly','sigmoid','linear'],
-                 'degree':[1,2,3],'gamma': [1, 0.1, 0.01, 0.001]})
+Input:
+word_vectors - tfidf vectorization for training data
+mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
+grid_search - Boolean flag for whether or not to perform grid search here
+"""
+def train_SVM_model(word_vectors, mpaa_ratings, grid_search=True):
+  if grid_search:
+    # Use gridsearch to find the optimal set of parameters
+    param_grid = ({'C':[0.1,1,100],
+                  'kernel':['rbf','poly','sigmoid','linear'],
+                  'degree':[1,2,3]})
+  else:
+    param_grid = ({'C':[1],
+                  'kernel':['rbf'],
+                  'degree':[2]})
+
+  # Create SVM and GridSearch object
   svm = sklearn.svm.SVC()
   grid = GridSearchCV(svm, param_grid)
 
+  # Search over the grid for optimal parameters for SVM
   model = grid.fit(word_vectors, mpaa_ratings)
-  #print best hyperparams
-  print('Best C:', grid.best_estimator_.get_params()['C'])
-  print('Best kernel:', grid.best_estimator_.get_params()['kernel'])
-  print('Best degree:', grid.best_estimator_.get_params()['degree'])
-  print('Best gamma:', grid.best_estimator_.get_params()['gamma'])
+  
+  # Save optimal parameters to JSON file
+  optim_params = grid.best_estimator_.get_params()
 
-  predict_test = model.predict(test_train)
-  return (
-      predict_test, 
-      accuracy_score(test_target, predict_test), 
-      f1_score(test_target, predict_test, average='weighted'),
-      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for i, x in enumerate(test_target) if x == 3)
-    )
+  with open('optimal_SVM_params.json', 'w') as fp:
+    json.dump(optim_params, fp)
 
-def trained_NB_model(word_vectors, mpaa_ratings, test_train, test_target):
+  return model
+
+"""
+Train the Naive Bayes model.
+Input:
+  word_vectors - tfidf vectorization for training data
+  mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
+"""
+def train_NB_model(word_vectors, mpaa_ratings):
   model = MultinomialNB().fit(word_vectors, mpaa_ratings)
-  predict_test = model.predict(test_train)
-  return (
-      predict_test, 
-      accuracy_score(test_target, predict_test), 
-      f1_score(test_target, predict_test, average='weighted'),
-      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for i, x in enumerate(test_target) if x == 3)
-    )
 
-def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
-  # List Hyperparameters that we want to tune
+  return model
+
+"""
+Train an Adaboost model.
+Input:
+  word_vectors - tfidf vectorization for training data
+  mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
+"""
+def train_Adaboost_model(word_vectors, mpaa_ratings, estimator = None):
+    model = AdaBoostClassifier(base_estimator = estimator, n_estimators=100, random_state=42).fit(word_vectors, mpaa_ratings)
+    
+    return model
+
+"""
+Train the KNN model.
+Input:
+  word_vectors - tfidf vectorization for training data
+  mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
+"""
+def train_KNN_model(word_vectors, mpaa_ratings):
+  # List hyperparameters that we want to tune
   leaf_size = list(range(1,9))
   n_neighbors = list(range(1,9))
   p = [1, 2]
@@ -66,81 +93,92 @@ def trained_KNN_model(word_vectors, mpaa_ratings, test_train, test_target):
   clf = GridSearchCV(knn, hyperparameters, cv=2)
 
   # Fit the model
-  best_model = clf.fit(word_vectors, mpaa_ratings)
+  model = clf.fit(word_vectors, mpaa_ratings)
 
-  # Print The value of best Hyperparameters
-  print('Best leaf_size:', best_model.best_estimator_.get_params()['leaf_size'])
-  print('Best p:', best_model.best_estimator_.get_params()['p'])
-  print('Best n_neighbors:', best_model.best_estimator_.get_params()['n_neighbors'])
+  # Save optimal parameters to JSON file
+  optim_params = model.best_estimator_.get_params()
 
-  predict_test = clf.predict(test_train)
-  # return the best model
-  #return accuracy rate
-  return (
-      predict_test, 
-      accuracy_score(test_target, predict_test), 
-      f1_score(test_target, predict_test, average='weighted'),
-      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for x in test_target if x == 3)
-    )
+  with open('optimal_SVM_params.json', 'w') as fp:
+    json.dump(optim_params, fp)
 
-def trained_Adaboost_model(word_vectors, mpaa_ratings, test_train, test_target, estimator = None):
-    model = AdaBoostClassifier(base_estimator = estimator, n_estimators=100, random_state=42).fit(word_vectors, mpaa_ratings)
-    predict_test = model.predict(test_train)
-    return (
-      predict_test, 
-      accuracy_score(test_target, predict_test), 
-      f1_score(test_target, predict_test, average='weighted'),
-      sum(1 for i, x in enumerate(test_target) if x == 3 and x == predict_test[i]) / sum(1 for i, x in enumerate(test_target) if x == 3)
-    )
+  return model
 
-# given data and a model, it runs the things, returns the things, and displays a confusian matrix if you ask nicely
-def run_model(train_vector, train_labels, test_vector, test_labels, model, conf_matrix = None):
-  if model == 'knn':
-    output = trained_KNN_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
+"""
+Predict for SVM/NB/KNN/Adaboost model.
+
+Input:
+test_vectors - input tfidf vectors for the test data
+test_target - MPAA rating labels for the test data (Numbers from 1 to 4, G to R)
+model_type - string specifying whether the model is SVM, Naive Bayes, KNN, Adaboost, or something else
+   MUST be included for optimal parameters to be saved correctly/not overwritten.
+
+IMPORTANT: DO NOT run this function until all training and validation has been completed.
+For final prediction only.
+"""
+def predict_model(model, test_vectors, test_target, model_type="SVM"):
+  # Predicted MPAA ratings
+  predicted_ratings = model.predict(test_vectors)
+
+  # Compute the number of predictions which were correct for PG-13 movies
+  PG_13_indices = predicted_ratings == 3
+  num_correct_PG_13 = sum(predicted_ratings[PG_13_indices] == test_target[PG_13_indices]) 
+  total_PG_13 = test_target[PG_13_indices].shape([0])
+  PG_13_correct = num_correct_PG_13 / total_PG_13
+
+  eval_metrics = {
+      "predicted": predicted_ratings, 
+      "accuracy_score" : accuracy_score(test_target, predicted_ratings), 
+      "f1_score": f1_score(test_target, predicted_ratings, average='weighted'),
+      "PG_13_correct": PG_13_correct
+  }
+      
+  with open('test_eval_metrics_{}.json'.format(model_type), 'w') as fp:
+    json.dump(eval_metrics, fp)
+
+  return eval_metrics
+
+"""
+Given data and a model type, it will train and validate the model.
+Displays confusion matrices for each of the k validation sets, and the 
+"average" confusion matrix (i.e. the average value for each of the cells)
+
+Input:
+  train_vector - tfidf vectors for train data
+  train_labels - MPAA ratings for train data
+  conf_matrix - Boolean flag for whether or not to display the confusion matrices
+
+Output:
+  None.
+"""
+def train_model(train_vector, train_labels, model_type, conf_matrix=True):
+  if model_type == 'knn':
+    model = train_KNN_model(train_vector, train_labels.astype(int))
   elif model == 'nb':
-    output = trained_NB_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
-  elif model == 'svm':
-    output = trained_SVM_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
-  elif model == 'adaboost':
-    output = trained_Adaboost_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int))
+    model = train_NB_model(train_vector, train_labels.astype(int))
+  elif model_type == 'svm':
+    # Make sure to update grid search flag as needed
+    model = train_SVM_model(train_vector, train_labels.astype(int), grid_search=False)
+  elif model_type == 'adaboost':
+    model = train_Adaboost_model(train_vector, train_labels.astype(int))
   elif model == 'adaboost_nb': 
-    output = trained_Adaboost_model(train_vector, train_labels.astype(int), test_vector, test_labels.astype(int), estimator = MultinomialNB())
+    model = train_Adaboost_model(train_vector, train_labels.astype(int), estimator = MultinomialNB())
 
-  predicted = output[0]
-  # print(predicted)
-
-  if not not conf_matrix:
+  if conf_matrix:
     matrix = sklearn.metrics.confusion_matrix(test_labels, predicted)
     cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix=matrix, display_labels=["G", "PG", "Mature"])
     cm_display.plot()
     plt.rcParams.update({'font.size': 33})
     plt.title(conf_matrix)
     plt.show()
-  return {'accuracy': output[1], 'f1': output[2], 'accuray for true mature': output[3]}
 
-if __name__ == "__main__":
-  '''word_vectors = [["hello"], ["hi"], ["hey"], ["amaa"], ["damn"], ["six"]]
-  categories = ['rec.motorcycles', 'sci.electronics',
-                'comp.graphics', 'sci.med']
-
-  train_data = fetch_20newsgroups(subset='train',
-                                  categories=categories, shuffle=True, random_state=42)
-  tfidf_transformer = TfidfTransformer()
-  count_vect = CountVectorizer()
-  X_train_counts = count_vect.fit_transform(train_data.data)
-  X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
-  #clf, best_model = trained_KNN_model(X_train_tfidf, train_data.target)
-  print(train_data.target)
-  mpaa_ratings = data_processing.mpaa_train_data()
-  print(mpaa_ratings.astype(int))'''
-  #https://iq.opengenus.org/text-classification-using-k-nearest-neighbors/
-
-  #---Vectorizing Data---
-  train_vector = data_preprocessing.word_vectorizer_train(type="train")
-  train_labels = data_preprocessing.mpaa_pre_processing(type="train")
-  test_vector = data_preprocessing.word_vectorizer_train(type="test")
-  test_labels = data_preprocessing.mpaa_pre_processing(type="test")
-
+"""
+Resample the data to treat imbalanced classes for MPAA Ratings.
+Input:
+train_vector - tfidf word vectors for training examples
+train_labels - MPAA ratings for training examples
+model_type - 
+"""
+def resampling_method(train_vector, train_labels, model_type="svm"):
   #---Resampled Data---
   x_rus, y_rus = imbalanced.RUS(train_vector, train_labels)
   x_tl, y_tl = imbalanced.TLinks(train_vector, train_labels)
@@ -152,24 +190,13 @@ if __name__ == "__main__":
 
   x_en, y_en = imbalanced.ENN(train_vector, train_labels)
 
-  # --- KNN ---
-  #if you want a confusion matrix, set 'conf_matrix' param to data_set
-  # for i, data_set in enumerate(DATA_SETS):
-    # print(f"ur {data_set} knn accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'knn', conf_matrix = None))
+  DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ROS', 'SMOTE', 'SMOTETomek']
+  for i, data_set in enumerate(DATA_SETS):
+    print(f"ur {data_set} ab/nb accuracy is:", train_model(all_data[i][0], all_data[i][1], test_vector, test_labels, model_type, conf_matrix = data_set))
 
-  # --- Naive Bayes ---
-  # print(f"ur enn nb accuracy is:", run_model(x_en, y_en, test_vector, test_labels, 'nb', conf_matrix = 'enn'))
-  for i, data_set in enumerate(DATA_SETS):
-    print(f"ur {data_set} nb accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'nb', conf_matrix = data_set))
-
-  #--- SVM ---
-  # for i, data_set in enumerate(DATA_SETS):
-    # print(f"ur {data_set} svm accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'svm', conf_matrix = None))
-  
-  # --- Adaboost ---
-  for i, data_set in enumerate(DATA_SETS):
-    print(f"ur {data_set} ab accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'adaboost', conf_matrix = data_set))
-  
-  # --- Adaboost + NB ---
-  for i, data_set in enumerate(DATA_SETS):
-    print(f"ur {data_set} ab/nb accuracy is:", run_model(all_data[i][0], all_data[i][1], test_vector, test_labels, 'adaboost_nb', conf_matrix = data_set))
+if __name__ == "__main__":
+  #---Vectorizing Data---
+  train_vector = data_preprocessing.word_vectorizer_train(type="train")
+  train_labels = data_preprocessing.mpaa_pre_processing(type="train")
+  test_vector = data_preprocessing.word_vectorizer_train(type="test")
+  test_labels = data_preprocessing.mpaa_pre_processing(type="test")
