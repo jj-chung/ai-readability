@@ -132,6 +132,11 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
 
   kf = KFold(n_splits=k)
   fold_num = 0
+  avg_eval_metrics = {
+      "accuracy_score" : [],
+      "f1_score": [],
+      "PG_13_correct": []
+  }
 
   for train_index, test_index in kf.split(X):
     print("Training on fold {}".format(fold_num))
@@ -147,11 +152,25 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, k=5):
       json.dump(optim_params, fp)
 
     # Evaluate the model on the test data
-    predict_model(model, X_test, y_test, model_type="SVM", conf_matrix=True, k_val=k)
+    eval_metrics = predict_model(model, X_test, y_test, model_type="SVM", conf_matrix=True, k_val=fold_num)
+
+    for key in eval_metrics:
+      if key in avg_eval_metrics:
+        avg_eval_metrics[key].append(eval_metrics[key])
 
     # Add to fold variable 
     fold_num += 1
       
+  # Save avg evaluation metrics to json
+  for key in avg_eval_metrics:
+    values = avg_eval_metrics[key]
+    avg_eval_metrics[key] = np.average(values)
+
+  # Save optimal parameters to JSON file
+  with open('mpaa_data/avg_eval_metrics_{}.json'.format(model_type), 'w') as fp:
+    json.dump(avg_eval_metrics, fp)
+
+  return avg_eval_metrics
 
 """
 Predict for SVM/NB/KNN/Adaboost model.
