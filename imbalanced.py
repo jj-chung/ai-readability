@@ -4,6 +4,17 @@ from imblearn.under_sampling import RandomUnderSampler, TomekLinks, EditedNeares
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 from imblearn.combine import SMOTETomek, SMOTEENN
 
+"""
+INPUT: label data
+OUTPUT: dict of counts by rating
+"""
+def get_catagory_counts(y):
+    return {
+        "G": sum([1 if label == 1 else 0 for label in y]),
+        "PG": sum([1 if label == 2 else 0 for label in y]),
+        "Mature": sum([1 if label == 3 else 0 for label in y])
+    }
+
 # Random Under Sampling
 def RUS(X, y):
     rus = RandomUnderSampler(sampling_strategy='auto')
