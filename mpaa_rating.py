@@ -24,7 +24,7 @@ word_vectors - tfidf vectorization for training data
 mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 grid_search - Boolean flag for whether or not to perform grid search here
 """
-def train_SVM_model(word_vectors, mpaa_ratings, data_type, grid_search=True, do_k_fold=True):
+def train_SVM_model(word_vectors, mpaa_ratings, sample_type, grid_search=True, do_k_fold=True):
   if grid_search:
     # Use gridsearch to find the optimal set of parameters
     param_grid = ({'C':[0.1,1,100],
@@ -42,9 +42,12 @@ def train_SVM_model(word_vectors, mpaa_ratings, data_type, grid_search=True, do_
   # Fit the model. If k-fold validation is specified, call the k-fold validation
   # function fit and predict k times.
   if do_k_fold:
-    k_fold_validation(clf, word_vectors, mpaa_ratings, "SVM", data_type)
+    k_fold_validation(clf, word_vectors, mpaa_ratings, "SVM", sample_type)
   else:
-    model = clf.fit(word_vectors, mpaa_ratings)
+    #re-sample
+    X_train, y_train = imbalanced.resample(word_vectors, mpaa_ratings, sample_type=sample_type)
+
+    model = clf.fit(X_train, y_train)
 
     # Save optimal parameters to JSON file
     optim_params = model.best_estimator_.get_params()
@@ -60,11 +63,14 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_NB_model(word_vectors, mpaa_ratings, data_type, do_k_fold=True):
+def train_NB_model(word_vectors, mpaa_ratings, sample_type, do_k_fold=True):
   if do_k_fold:
-    k_fold_validation(MultinomialNB(), word_vectors, mpaa_ratings, "NB", data_type)
+    k_fold_validation(MultinomialNB(), word_vectors, mpaa_ratings, "NB", sample_type)
   else:
-    model = MultinomialNB().fit(word_vectors, mpaa_ratings)
+    #re-sample
+    X_train, y_train = imbalanced.resample(word_vectors, mpaa_ratings, sample_type=sample_type)
+
+    model = MultinomialNB().fit(X_train, y_train)
     return model
 
 """
@@ -73,13 +79,17 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_Adaboost_model(word_vectors, mpaa_ratings, data_type, estimator = None, do_k_fold=True):
-  ABClassifier = AdaBoostClassifier(base_estimator = estimator, n_estimators=100, random_state=42)
+def train_Adaboost_model(word_vectors, mpaa_ratings, sample_type, estimator = None, do_k_fold=True):
+  ABClassifier = AdaBoostClassifier(base_estimator = estimator, n_estimators=100)
   
   if do_k_fold:
-    k_fold_validation(model, word_vectors, mpaa_ratings, "AdaBoost", data_type)
+    # NOTE: gives AdaBoost name to all classifiers regardless of base estimators, bad
+    k_fold_validation(ABClassifier, word_vectors, mpaa_ratings, "AdaBoost", sample_type)
   else:
-    model = ABClassifier.fit(word_vectors, mpaa_ratings)
+    #re-sample
+    X_train, y_train = imbalanced.resample(word_vectors, mpaa_ratings, sample_type=sample_type)
+
+    model = ABClassifier.fit(X_train, y_train)
     return model
     
 
@@ -89,7 +99,7 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_KNN_model(word_vectors, mpaa_ratings, data_type, do_k_fold=True):
+def train_KNN_model(word_vectors, mpaa_ratings, sample_type, do_k_fold=True):
   # List hyperparameters that we want to tune
   leaf_size = list(range(1,9))
   n_neighbors = list(range(1,9))
@@ -107,9 +117,12 @@ def train_KNN_model(word_vectors, mpaa_ratings, data_type, do_k_fold=True):
   # Fit the model. If k-fold validation is specified, call the k-fold validation
   # function fit and predict k times.
   if do_k_fold:
-    k_fold_validation(clf, word_vectors, mpaa_ratings, "KNN", data_type)
+    k_fold_validation(clf, word_vectors, mpaa_ratings, "KNN", sample_type)
   else:
-    model = clf.fit(word_vectors, mpaa_ratings)
+    #re-sample
+    X_train, y_train = imbalanced.resample(word_vectors, mpaa_ratings, sample_type=sample_type)
+
+    model = clf.fit(X_train, y_train)
 
     # Save optimal parameters to JSON file
     optim_params = model.best_estimator_.get_params()
@@ -126,7 +139,7 @@ Input:
   train_vectors - the training dataset tfidf vectors
   train_ratings - the training dataset MPAA ratings
 """
-def k_fold_validation(clf, train_vectors, train_ratings, model_type, data_type, k=5):
+def k_fold_validation(clf, train_vectors, train_ratings, model_type, sample_type, k=5):
   X = train_vectors
   y = train_ratings
 
@@ -143,17 +156,20 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, data_type, 
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
 
+    #Resample the training data
+    X_train, y_train = imbalanced.resample(X_train, y_train, sample_type=sample_type)
+
     # Train the model on the train data
     model = clf.fit(X_train, y_train)
 
     if model_type in ["SVM", "KNN"]:
       # Save optimal parameters to JSON file
       optim_params = model.best_estimator_.get_params()
-      with open(f'mpaa_data/optimal_{model_type}_params_{k}_{data_type}.json', 'w') as fp:
+      with open(f'mpaa_data/optimal_{model_type}_params_{k}_{sample_type}.json', 'w') as fp:
         json.dump(optim_params, fp)
 
     # Evaluate the model on the test data
-    eval_metrics = predict_model(model, X_test, y_test, data_type, model_type=model_type, conf_matrix=True, k_val=fold_num)
+    eval_metrics = predict_model(model, X_test, y_test, sample_type, model_type=model_type, conf_matrix=True, k_val=fold_num)
 
     for key in eval_metrics:
       if key in avg_eval_metrics:
@@ -168,7 +184,7 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, data_type, 
     avg_eval_metrics[key] = np.average(values)
 
   # Save optimal parameters to JSON file
-  with open(f'mpaa_data/avg_eval_metrics_{model_type}_{data_type}.json', 'w') as fp:
+  with open(f'mpaa_data/avg_eval_metrics_{model_type}_{sample_type}.json', 'w') as fp:
     json.dump(avg_eval_metrics, fp)
 
   return avg_eval_metrics
@@ -187,7 +203,7 @@ k - Value of k if prediction is being used for k-fold validation
 IMPORTANT: DO NOT run this function on actual test data until all training and 
 validation has been completed.
 """
-def predict_model(model, test_vectors, test_target, data_type, model_type="SVM", conf_matrix=True, k_val="N/A"):
+def predict_model(model, test_vectors, test_target, sample_type="Imbalanced", model_type="SVM", conf_matrix=True, k_val="N/A"):
   # Predicted MPAA ratings
   predicted_ratings = model.predict(test_vectors)
 
@@ -205,7 +221,7 @@ def predict_model(model, test_vectors, test_target, data_type, model_type="SVM",
       "Mature_correct": float(Mature_correct)
   }
       
-  with open(f'mpaa_data/test_eval_metrics_{model_type}_{k_val}.json', 'w') as fp:
+  with open(f'mpaa_data/test_eval_metrics_{model_type}_{k_val}_{sample_type}.json', 'w') as fp:
     json.dump(eval_metrics, fp)
 
   # Create a confusion matrix
@@ -215,7 +231,7 @@ def predict_model(model, test_vectors, test_target, data_type, model_type="SVM",
     cm_display.plot()
     plt.rcParams.update({'font.size': 20})
     plt.title(f"Confusion Matrix for {model_type}")
-    plt.savefig(f"images/Confusion_Matrix_{model_type}_k={k_val}_{data_type}")
+    plt.savefig(f"images/Confusion_Matrix_{model_type}_k={k_val}_{sample_type}")
 
   return eval_metrics
 
@@ -227,49 +243,26 @@ Displays confusion matrices for each of the k validation sets, and the
 Input:
   train_vector - tfidf vectors for train data
   train_labels - MPAA ratings for train data
-  conf_matrix - Boolean flag for whether or not to display the confusion matrices
+  model_type - which model to train on: 'knn', 'nb', 'svm', 'adaboost', 'adaboost_nb'
+  sample_type - which sampling method to use when training model: 'Imbalanced', 'RUS', 'TomekLinks', 'ENN', 'ROS', 'SMOTE', 'SMOTETomek'
 
 Output:
   None.
 """
-def train_model(train_vector, train_labels, model_type, data_type="balanced"):
+def train_model(train_vector, train_labels, model_type, sample_type="Imbalanced"):
   if model_type == 'knn':
-    model = train_KNN_model(train_vector, train_labels.astype(int), data_type)
+    model = train_KNN_model(train_vector, train_labels.astype(int), sample_type)
   elif model_type == 'nb':
-    model = train_NB_model(train_vector, train_labels.astype(int), data_type)
+    model = train_NB_model(train_vector, train_labels.astype(int), sample_type)
   elif model_type == 'svm':
     # Make sure to update grid search flag as needed
-    model = train_SVM_model(train_vector, train_labels.astype(int), data_type, grid_search=False)
+    model = train_SVM_model(train_vector, train_labels.astype(int), sample_type, grid_search=False)
   elif model_type == 'adaboost':
-    model = train_Adaboost_model(train_vector, train_labels.astype(int))
+    model = train_Adaboost_model(train_vector, train_labels.astype(int), sample_type)
   elif model_type == 'adaboost_nb': 
-    model = train_Adaboost_model(train_vector, train_labels.astype(int), data_type, estimator = MultinomialNB())
+    model = train_Adaboost_model(train_vector, train_labels.astype(int), sample_type, estimator = MultinomialNB())
 
   return model
-
-"""
-Resample the data to treat imbalanced classes for MPAA Ratings.
-Input:
-train_vector - tfidf word vectors for training examples
-train_labels - MPAA ratings for training examples
-model_type - 
-"""
-def resampling_method(train_vector, train_labels, model_type="svm"):
-  #---Resampled Data---
-  x_rus, y_rus = imbalanced.RUS(train_vector, train_labels)
-  x_tl, y_tl = imbalanced.TLinks(train_vector, train_labels)
-  x_ros, y_ros = imbalanced.ROS(train_vector, train_labels)
-  x_sm, y_sm = imbalanced.SMOTE_Reg(train_vector, train_labels)
-  x_smt, y_smt = imbalanced.SMOTE_TL(train_vector, train_labels)
-
-  x_en, y_en = imbalanced.ENN(train_vector, train_labels)
-
-  all_data = [(train_vector, train_labels), (x_rus, y_rus), (x_tl, y_tl), (x_en, y_en),
-    (x_ros, y_ros), (x_sm, y_sm), (x_smt, y_smt)]
-
-  DATA_SETS = ['Imbalanced', 'RUS', 'TomekLinks', 'ENN', 'ROS', 'SMOTE', 'SMOTETomek']
-  for i, data_set in enumerate(DATA_SETS):
-    train_model(all_data[i][0], all_data[i][1], model_type, data_type=data_set)
 
 if __name__ == "__main__":
   #---Vectorizing Data---
@@ -278,4 +271,11 @@ if __name__ == "__main__":
   test_vector = data_preprocessing.word_vectorizer_train(type="test")
   test_labels = data_preprocessing.mpaa_pre_processing(type="test")
 
-  resampling_method(train_vector, train_labels, "nb")
+  # array of (model,sample) pairs to train and run 
+  # ['knn', 'nb', 'svm', 'adaboost', 'adaboost_nb'] X 'Imbalanced', 'RUS', 'TomekLinks', 'ENN', 'ROS', 'SMOTE', 'SMOTETomek'
+  choo_choo_trains = [('adaboost', 'ROS')]
+
+  for train in choo_choo_trains:
+    model = train[0]
+    sample_type = train[1]
+    train_model(train_vector, train_labels, model, sample_type=sample_type)
