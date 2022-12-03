@@ -37,6 +37,17 @@ def word_vectorizer_train(type="train"):
   X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
   return X_train_tfidf
 
+
+def word_vectorizer_keras(type="train"):
+  text = None
+
+  text = text_pre_processing(type)
+
+  vec = TfidfVectorizer(max_features=2000)
+  tfidf_mat = vec.fit_transform(text).toarray()
+
+  return tfidf_mat
+
 """
 Further pre-process the data to exclude stop words. Also use text tokenization
 to reduce text to tokens.
