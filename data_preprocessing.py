@@ -1,9 +1,8 @@
 from raw_data import *
 import sklearn
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.tokenize import word_tokenize
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -11,9 +10,6 @@ nltk.download('wordnet')
 from nltk.stem import WordNetLemmatizer 
 import contractions
 import spacy
-from spacy_syllables import SpacySyllables
-from spacy.lang.en import English
-from spacy.pipeline import Sentencizer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import matplotlib

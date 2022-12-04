@@ -46,15 +46,17 @@ if __name__ == "__main__":
     # Train NN on training data 
     train_vector = data_preprocessing.create_new_features(type="train")
     train_vector_tensor = train_vector.astype('float32')
-
     train_score = bt_easiness_train_data()
     train_score_tensor = train_score.astype('float32')
+
+    # Testing data
     test_vector = data_preprocessing.create_new_features(type="test")
     test_vector_tensor = test_vector.astype('float32')
-
     test_score = bt_easiness_test_data()
     test_score_tensor = test_score.astype('float32')
 
-    model1 = neural_network(X_train=train_vector_tensor, y_train=train_score_tensor, Validation_data=None, batch_size=64)
-    predicted = model1.predict(test_vector_tensor)
+    model = neural_network(X_train=train_vector_tensor, y_train=train_score_tensor, Validation_data=None, batch_size=64)
+    predicted = model.predict(test_vector_tensor)
+
+    # Save mean square error to data file
     print(mean_squared_error(predicted, test_score_tensor))
