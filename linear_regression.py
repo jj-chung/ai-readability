@@ -92,7 +92,7 @@ def cefr_baseline():
   sentence length (baseline) and other features (non-baseline).
 """
 def sentence_word_len(baseline):
-  data = create_new_features("train", baseline)
+  data = create_new_features("train", baseline, preprocessed=True)
   X = data[:, :-1]
   y = data[:, -1]
   if not baseline:

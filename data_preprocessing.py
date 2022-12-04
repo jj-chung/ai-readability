@@ -21,14 +21,25 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import random
 import scipy as sp
 from sklearn import preprocessing
+import json
+from json import JSONEncoder
+import h5py
+from pathlib import Path
+
 # from datasets import Dataset
+# from transformers import AutoTokenizer
 
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 
-"""
+class NumpyArrayEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return JSONEncoder.default(self, obj)
+
 # Applies the tokenizer for bert to an example text-- includes [CLS] token (I think?)
 def tokenize(data):
     return tokenizer(data["text"], padding="max_length", truncation=True)
@@ -52,7 +63,6 @@ def bert_pre_processing(type="train"):
   # structure data like: https://huggingface.co/docs/transformers/training#train-with-pytorch-trainer
   # data_set = [{'label': label, 'text': tokenize()} for i, label in enumerate(labels)]
   return data_set.map(tokenize, batched=True)
-"""
 
 """
 Convert text to word vector.
@@ -122,7 +132,14 @@ def mpaa_pre_processing(type="train"):
 Create 2 new features, average word length and average sentence length, using
 the text excerpt data. 
 """
-def create_new_features(type="train", baseline=False):
+def create_new_features(type="train", baseline=False, preprocessed=False):
+  # Load data if specified and the file exists
+  my_file = Path("features_arr.h5")
+  if my_file.is_file() and preprocessed:
+    f = h5py.File('features_arr.h5','r')
+    finalNumpyArray = f.get('features_arr').value
+    return finalNumpyArray
+  
   # First, get all the data
   # Save the new data
   data_excerpts = text_pre_processing(type)
@@ -261,6 +278,10 @@ def create_new_features(type="train", baseline=False):
 
   # Tack on y-data, i.e. bt-easiness
   features_arr = np.column_stack((features_arr, bt_easiness))
+
+  # Save the features array in a json file
+  f = h5py.File('features_arr.h5', 'w')
+  f.create_dataset("features_arr", data=features_arr.astype('float32'))
 
   return features_arr
 
