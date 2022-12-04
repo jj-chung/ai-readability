@@ -41,9 +41,10 @@ def neural_network(X_train, y_train, metrics=['mean_squared_error', 'mean_absolu
 
 def nn_train(type="train"):
   # Train NN on training data 
-  train_vector = create_new_features(type=type)
+  all_data = create_new_features(type=type)
+  train_vector = all_data[:, :-1]
   train_vector = train_vector.astype('float32')
-  train_bt_easiness = bt_easiness_train_data()
+  train_bt_easiness = all_data[:, -1]
   train_bt_easiness = train_bt_easiness.astype('float32')
   
   fold_num = 0
