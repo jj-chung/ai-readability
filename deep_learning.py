@@ -19,18 +19,18 @@ Train a neural network using keras.
 """
 def neural_network(X_train, y_train, metrics=['mean_squared_error', 'mean_absolute_error'],
                    activation='relu', input_shape=(None, 2036), optimizer='adam', loss='mean_squared_error',
-                   epochs=10, batch_size=64, verbose=1):
+                   epochs=40, batch_size=64, verbose=1):
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
-    model.add(Dropout(0.3))
+    #model.add(Dropout(0.3))
     model.add(Dense(100, activation=activation))
-    model.add(Dropout(0.3))
+    #model.add(Dropout(0.3))
     model.add(Dense(50, activation=activation))
-    model.add(Dropout(0.3))
+    #model.add(Dropout(0.3))
     model.add(Dense(10, activation=activation))
-    model.add(Dropout(0.3))
+    #model.add(Dropout(0.3))
     model.add(Dense(5, activation=activation))
-    model.add(Dropout(0.3))
+    #model.add(Dropout(0.3))
     model.add(Dense(1))
     model.summary()
     model.compile(loss=loss, metrics=metrics, optimizer=optimizer)
