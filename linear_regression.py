@@ -6,9 +6,15 @@ from raw_data import *
 from data_preprocessing import *
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
+from sklearn.linear_model import Ridge
 
-def train_linear_regression(X, y):
-    reg = LinearRegression().fit(X, y)
+def train_regression(X, y, ridge=False):
+    clf = LinearRegression()
+
+    if ridge:
+      clf = Ridge(alpha=1.0)
+
+    reg = clf.fit(X, y)
     score = reg.score(X, y)
     coeffs = reg.coef_
     intercept = reg.intercept_
@@ -34,7 +40,7 @@ def predict_linear_regression(reg, X, y):
     preds = reg.predict(X)
     model_error = mean_squared_error(y, preds)
 
-    return [preds, model_error] 
+    return [preds, model_error]
 
 """
   Create a scatter plot of X and y data, with y_pred determining a line.
@@ -72,6 +78,9 @@ def sentence_word_len(baseline):
   data = create_new_features("train", baseline)
   X = data[:, :-1]
   y = data[:, -1]
+  if not baseline:
+    return regression(X, y, ridge=True)
+    
   return regression(X, y)
 
 """
@@ -82,16 +91,16 @@ def bag_of_words_regression():
   y = bt_easiness_train_data()
   return regression(X, y)
 
-def regression(X, y):
+def regression(X, y, ridge=False):
+  kf = KFold(n_splits = 5)
   train_errs = []
   val_errs = []
-  kf = KFold(n_splits = 5)
 
   for train_idx, val_idx in kf.split(X):
     X_train, X_val = X[train_idx], X[val_idx]
     y_train, y_val = y[train_idx], y[val_idx]
 
-    reg = train_linear_regression(X_train, y_train)
+    reg = train_regression(X_train, y_train, ridge)
     train_preds, train_err = predict_linear_regression(reg, X_train, y_train)
     val_preds, val_err = predict_linear_regression(reg, X_val, y_val)
 
@@ -101,8 +110,11 @@ def regression(X, y):
   return "Avg train err: {}, Avg val err: {}".format(np.average(train_errs), np.average(val_errs))
 
 if __name__ == "__main__":
-    print(sentence_word_len(True))
+    # baseline: Avg train err: 0.7266013976169523, Avg val err: 0.7289265067907919
+    # print(sentence_word_len(True))
+
+    # Non-baseline regression with additional NLP features
     print(sentence_word_len(False))
 
-    # Create a plot of CEFR data against BT_easiness with the regression line
+    # Create a plot of CEFR data against BT_easiness with the regression line for baseline
     # create_plot(X, y, preds)

@@ -19,15 +19,14 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import random
+import scipy as sp
 
 """
 Convert text to word vector.
 
 Input: Flag for determining whether data is test or train.
 """
-def word_vectorizer_train(type="train"):
-  text = None
-
+def word_vectorizer(type="train"):
   text = text_pre_processing(type)
 
   count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=2000)
@@ -39,8 +38,6 @@ def word_vectorizer_train(type="train"):
 
 
 def word_vectorizer_keras(type="train"):
-  text = None
-
   text = text_pre_processing(type)
 
   vec = TfidfVectorizer(max_features=2000)
@@ -62,16 +59,14 @@ class LemmaTokenizer:
       return [self.wnl.lemmatize(t) for t in word_tokenize(doc)]
 
 def text_pre_processing(type="train"):
-  data = None
-
   if type == "train":
     data = text_train_data()
   elif type == "test":
     data = text_test_data()
 
   for i in range(data.shape[0]):
-    if i % 100 == 0:
-      print(i)
+    if i % 200 == 0:
+      print(f'Excerpt cleaned: {i}')
 
     excerpt = data[i]
 
@@ -91,8 +86,6 @@ def text_pre_processing(type="train"):
   return data
 
 def mpaa_pre_processing(type="train"):
-  data = None
-
   if type == "train":
     data = mpaa_train_data()
   elif type == "test":
@@ -114,6 +107,22 @@ def create_new_features(type="train", baseline=True):
   avg_sentence_length = []
   unique_word_ct = []
   avg_syllables = []
+  num_punct_arr = []
+
+  pos_dict = {}
+  for key in ['ADJ', 'ADP', 'PUNCT', 'ADV', 'AUX', 'SYM', 'INTJ', 'CCONJ',	'X',
+    'NOUN',	'DET', 'PROPN', 'NUM', 'VERB', 'PART', 'PRON', 'SCONJ', 'SPACE']:
+    pos_dict[key] = []
+
+  tense_dict = {}
+  for key in ['Fut','Imp', 'Past', 'Pqp', 'Pres']:
+    tense_dict[key] = []
+
+  verbForm_dict = {}
+  for key in ['Conv', 'Fin', 'Gdv', 'Ger', 'Inf', 'Part', 'Sup', 'Vnoun']:
+    verbForm_dict[key] = []
+
+  overall_word_dicts = [pos_dict, tense_dict, verbForm_dict]
 
   nlp = spacy.load("en_core_web_sm")
   nlp.add_pipe("syllables", after="tagger")
@@ -122,13 +131,14 @@ def create_new_features(type="train", baseline=True):
   for i in range(data_excerpts.shape[0]):
     excerpt = data_excerpts[i]
 
-    if i % 100 == 0:
-      print(i)
+    if i % 200 == 0:
+      print(f'Excerpts Preprocessed: {i}')
 
     # Compute average word length for the excerpt
     doc = nlp(excerpt)
     words = [token.text for token in doc if (not token.is_punct and token.text != '\n')]
     syllables_list = [token._.syllables_count for token in doc if (not token.is_punct and token.text != '\n')]
+    punctuation_list = [token._.syllables_count for token in doc if (token.is_punct and token.text != '\n')]
 
     total_avg = sum( map(len, words) ) / len(words)
     avg_word_length.append(total_avg)
@@ -139,8 +149,48 @@ def create_new_features(type="train", baseline=True):
     total_avg = sum( map(len, sentences) ) / len(sentences)
     avg_sentence_length.append(total_avg)
 
-    # Consider the number of uncommon words in the text
-    # uncommon_words_ct = 
+    pos_dict_excerpt = {}
+    verbForms_excerpt = {}
+    tenses_excerpt = {}
+
+    word_dicts = [pos_dict_excerpt, verbForms_excerpt, tenses_excerpt]
+
+    # Consider the part of speech vector
+    word_pos = [token.pos_ for token in doc]
+
+    # Consider the morphology of the word (how the stem (lemma) is converted to 
+    # its existing form in the text)
+    word_verbForm = [token.morph.get('VerbForm') for token in doc]
+    word_verbForm = ['' if form == [] else form[0] for form in word_verbForm]
+    word_tense = [token.morph.get('Tense') for token in doc]
+    word_tense = ['' if tense == [] else tense[0] for tense in word_tense]
+
+    # List of all word attributes
+    word_lists = [word_pos, word_verbForm, word_tense]
+    
+    # Create a dictionary from tense/verbform/pos to counts
+    for i, word_dict in enumerate(word_dicts):
+      word_list = word_lists[i]
+      for attribute in word_list:
+        if attribute not in word_dict:
+          word_dict[attribute] = 1
+        else:
+          word_dict[attribute] += 1
+
+    # Append each counts dictionary respective feature vector
+    for i, overall_word_dict in enumerate(overall_word_dicts):
+      word_dict = word_dicts[i]
+
+      for key in overall_word_dict:
+        if key in word_dict:
+          count = word_dict[key] / len(doc)
+          overall_word_dict[key].append(count)
+        else:
+          overall_word_dict[key].append(0)
+
+    # The amount of puncutation in the text
+    num_punct = len(punctuation_list)
+    num_punct_arr.append(num_punct)
 
     # Consider the number of unique words in the text
     unique_word_ct.append(len(set(words)))
@@ -163,12 +213,27 @@ def create_new_features(type="train", baseline=True):
   # and average sentence length as a feature.
   if baseline:
     features_arr = np.column_stack((avg_word_length, avg_sentence_length, bt_easiness))
-    print(features_arr.shape)
     return features_arr
   
-  features_arr = np.column_stack((avg_word_length, avg_sentence_length,  
-    unique_word_ct, avg_syllables, bt_easiness))
-  print(features_arr.shape)
+  features_arr = np.column_stack((avg_word_length, 
+                                  avg_sentence_length, 
+                                  num_punct_arr,
+                                  unique_word_ct, 
+                                  avg_syllables))
+
+  # Append additional spacy NLP characteristics
+  for word_dict in overall_word_dicts:
+    for attribute in word_dict:
+      features_arr = np.column_stack((features_arr, word_dict[attribute]))
+  
+  features_arr = np.column_stack((features_arr, bt_easiness))
+
+  # Append all the TFIDF vectorizations
+  word_vectors = word_vectorizer(type="train").toarray()
+  
+  # features_arr = sp.sparse.hstack((features_arr, word_vectors))
+  features_arr = np.column_stack((word_vectors, features_arr))
+
   return features_arr
 
 def find_stopwords_overlap():
