@@ -104,11 +104,7 @@ def nn_train(type="train"):
     # X_train, y_train = imbalanced.resample(X_train, y_train, sample_type=sample_type)
 
     # Train the model on the train data
-<<<<<<< HEAD
     model = neural_network(X_train, y_train, batch_size=64, input_shape =(X_train.shape[1],))
-=======
-    model = neural_network(X_train, y_train, batch_size=64, input_shape=(X_train.shape[1],))
->>>>>>> 974afdf11c84bf1e94f95bffc1179dba2aba3adf
 
     results = nn_predict(model, X_train, y_train, type='train', k_val=fold_num)
     train_MSE = results['MSE']
@@ -125,11 +121,7 @@ def nn_train(type="train"):
     'avg_train_MSE': np.average(train_errs),
     'avg_val_MSE': np.average(val_errs)
   }
-<<<<<<< HEAD
-
-=======
   
->>>>>>> 974afdf11c84bf1e94f95bffc1179dba2aba3adf
   with open(f'keras_data/MSE_and_predictions_avg.json', 'w') as fp:
       json.dump(results, fp)
 
