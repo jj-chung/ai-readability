@@ -20,6 +20,31 @@ import matplotlib
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import random
 import scipy as sp
+from transformers import AutoTokenizer
+
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+
+# Applies the tokenizer for bert to an example text-- includes [CLS] token (I think?)
+def tokenize(text):
+    return tokenizer(text, padding="max_length", truncation=True)
+
+# Gets data preprocessed into an array of label, token dicts for Bert
+def bert_pre_processing(type="train"):
+  data = None
+  if type == "train":
+    data = text_train_data()
+  elif type == "test":
+    data = text_test_data()
+  
+  # merge labels and data 
+  labels = mpaa_pre_processing(type=type)
+
+  # structure data like: https://huggingface.co/docs/transformers/training#train-with-pytorch-trainer
+  data_set = [{'label': label, 'text': tokenize(data[i])} for i, label in enumerate(labels)]
+  return data_set
 
 """
 Convert text to word vector.
