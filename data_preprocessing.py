@@ -36,7 +36,6 @@ def word_vectorizer(type="train"):
   X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
   return X_train_tfidf
 
-
 def word_vectorizer_keras(type="train"):
   text = text_pre_processing(type)
 

@@ -11,10 +11,11 @@ from keras.utils import np_utils
 from sklearn.model_selection import KFold
 import data_preprocessing
 import tensorflow as tf
+import scipy as sp
 
 #stole this shit
 def neural_network(X_train, y_train, Validation_data, metrics=['mean_squared_error', 'mean_absolute_error'],
-                   activation='relu', input_shape=(2000,), optimizer='adam', loss='mean_squared_error',
+                   activation='relu', input_shape=(None, 3), optimizer='adam', loss='mean_squared_error',
                    epochs=10, batch_size=64, verbose=1):
     """
     We are defining a neural network function that takes into account a different set of parameters
@@ -82,23 +83,28 @@ def predict_nn(model, test_vect, test_scores):
 
 if __name__ == "__main__":
     # Train NN on training data 
-    train_vector = data_preprocessing.word_vectorizer_train(type="train")
-    tensor1 = np.asarray(train_vector).astype('float32')
-    #tensor1 = tf.convert_to_tensor(train_vector , dtype=tf.int32)
+    train_vector = data_preprocessing.create_new_features(type="train")
+    #tensor1 = train_vector.astype('float32')
+    #print('SHAPE? ', tensor1.shape[0], tensor1.shape[1])
+    #print(tensor1.shape[0])
+    #tensor1 = np.asarray(train_vector).astype('float32')
+    train_vector_tensor = tf.convert_to_tensor(train_vector , dtype=tf.float32)
 
     train_score = bt_easiness_train_data()
-    y_train_tesor = tf.convert_to_tensor(train_score , dtype=tf.int32)
-    test_vector = data_preprocessing.word_vectorizer_train(type="test")
-    tensor2 = np.asarray(test_vector).astype('float32')
-    #tensor2 = tf.convert_to_tensor(train_vector, dtype=tf.int32)
+    #y_train_tesor = np.asarray(train_score).astype('float32')
+    train_score_tensor = tf.convert_to_tensor(train_score , dtype=tf.float32)
+    test_vector = data_preprocessing.create_new_features(type="test")
+    #tensor2 = test_vector.astype('float32')
+    #tensor2 = np.asarray(test_vector).astype('float32')
+    test_vector_tensor = tf.convert_to_tensor(test_vector, dtype=tf.float32)
 
     test_score = bt_easiness_test_data()
-    test_score_tensor = np.asarray(test_score).astype('float32')
-    #test_score_tensor = tf.convert_to_tensor(test_score , dtype=tf.int32)
+    #test_score_tensor = np.asarray(test_score).astype('float32')
+    test_score_tensor = tf.convert_to_tensor(test_score , dtype=tf.float32)
     '''model = train_nn(train_vector, train_score)
     accuracy = predict_nn(model, test_vector, test_score)
     print('nn accuracy:', accuracy)'''
 
-    model1 = neural_network(X_train=tensor1, y_train=y_train_tesor)
-    predicted = model1.predict(tensor2)
-    print(mean_squared_error(predicted, test_score))
+    model1 = neural_network(X_train=train_vector_tensor, y_train=train_score_tensor, Validation_data=None, batch_size=64)
+    predicted = model1.predict(test_vector_tensor)
+    print(mean_squared_error(predicted, np.asarray(test_score).astype('float32')))
