@@ -20,12 +20,13 @@ import matplotlib
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import random
 import scipy as sp
-from transformers import AutoTokenizer
+from sklearn import preprocessing
+# from transformers import AutoTokenizer
 
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
+# tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 
 # Applies the tokenizer for bert to an example text-- includes [CLS] token (I think?)
 def tokenize(text):
@@ -250,14 +251,18 @@ def create_new_features(type="train", baseline=True):
   for word_dict in overall_word_dicts:
     for attribute in word_dict:
       features_arr = np.column_stack((features_arr, word_dict[attribute]))
-  
-  features_arr = np.column_stack((features_arr, bt_easiness))
 
   # Append all the TFIDF vectorizations
   word_vectors = word_vectorizer(type="train").toarray()
-  
-  # features_arr = sp.sparse.hstack((features_arr, word_vectors))
+
   features_arr = np.column_stack((word_vectors, features_arr))
+
+  # Normalize X-features to have zero mean and unit variance
+  scaler = preprocessing.StandardScaler().fit(features_arr)
+  features_arr = scaler.transform(features_arr)
+
+  # Tack on y-data, i.e. bt-easiness
+  features_arr = np.column_stack((features_arr, bt_easiness))
 
   return features_arr
 

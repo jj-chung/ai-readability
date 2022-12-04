@@ -7,20 +7,37 @@ from data_preprocessing import *
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
 from sklearn.linear_model import Ridge
+from sklearn.model_selection import GridSearchCV
 
 def train_regression(X, y, ridge=False):
     clf = LinearRegression()
+    alpha_range = range(2800, 3000, 10)
 
     if ridge:
-      clf = Ridge(alpha=1.0)
+      parameters = {'alpha': alpha_range}
+      ridge = Ridge()
+      clf = GridSearchCV(ridge, parameters)
 
-    reg = clf.fit(X, y)
+    clf = clf.fit(X, y)
+    reg = clf.best_estimator_
     score = reg.score(X, y)
     coeffs = reg.coef_
     intercept = reg.intercept_
 
+    # Create and save plot for gridsearch
+    scores = clf.cv_results_['mean_test_score']
+    scores = np.array(scores).reshape(len(alpha_range))
+    print(scores)
+
+    plt.plot(alpha_range, scores)
+
+    plt.xlabel('Alpha')
+    plt.ylabel('Mean score')
+    plt.savefig('images/gridsearch_ridge_regression.png')
+
     # Save coefficients and scores as a dictionary in file
-    regression_output = {"score": score, "coeffs": coeffs.tolist(), "intercept": intercept}
+    regression_output = {"score": score, "coeffs": coeffs.tolist(), "intercept": intercept,
+      "best_params": clf.best_params_}
 
     # create json object from dictionary
     json_obj = json.dumps(regression_output)
@@ -80,7 +97,7 @@ def sentence_word_len(baseline):
   y = data[:, -1]
   if not baseline:
     return regression(X, y, ridge=True)
-    
+
   return regression(X, y)
 
 """
