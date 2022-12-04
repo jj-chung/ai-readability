@@ -122,7 +122,7 @@ def mpaa_pre_processing(type="train"):
 Create 2 new features, average word length and average sentence length, using
 the text excerpt data. 
 """
-def create_new_features(type="train", baseline=True):
+def create_new_features(type="train", baseline=False):
   # First, get all the data
   # Save the new data
   data_excerpts = text_pre_processing(type)

@@ -17,8 +17,8 @@ import imbalanced
 """
 Train a neural network using keras.
 """
-def neural_network(X_train, y_train, Validation_data, metrics=['mean_squared_error', 'mean_absolute_error'],
-                   activation='relu', input_shape=(None, 3), optimizer='adam', loss='mean_squared_error',
+def neural_network(X_train, y_train, metrics=['mean_squared_error', 'mean_absolute_error'],
+                   activation='relu', input_shape=(None, 2037), optimizer='adam', loss='mean_squared_error',
                    epochs=10, batch_size=64, verbose=1):
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
@@ -35,22 +35,22 @@ def neural_network(X_train, y_train, Validation_data, metrics=['mean_squared_err
     model.summary()
     model.compile(loss=loss, metrics=metrics, optimizer=optimizer)
 
-    if Validation_data:
-        model.fit(x=X_train, y=y_train, validation_data=Validation_data, epochs=epochs, batch_size=batch_size,
-                  verbose=verbose)
-    else:
-        model.fit(x=X_train, y=y_train, epochs=epochs, batch_size=batch_size, verbose=verbose)
+    model.fit(x=X_train, y=y_train, epochs=epochs, batch_size=batch_size, verbose=verbose)
+    
     return model
 
 def nn_train(type="train"):
   # Train NN on training data 
-  train_vector = data_preprocessing.create_new_features(type=type)
+  train_vector = create_new_features(type=type)
   train_vector = train_vector.astype('float32')
   train_bt_easiness = bt_easiness_train_data()
   train_bt_easiness = train_bt_easiness.astype('float32')
   
   fold_num = 0
   kf = KFold(n_splits=5, shuffle=True)
+
+  print(train_vector.shape)
+  print(train_bt_easiness.shape)
 
   # Do k-fold validation here
   for train_index, test_index in kf.split(train_vector):
@@ -62,7 +62,9 @@ def nn_train(type="train"):
     # X_train, y_train = imbalanced.resample(X_train, y_train, sample_type=sample_type)
 
     # Train the model on the train data
-    model = neural_network(X_train, y_train, Validation_data=None, batch_size=64)
+    print(X_train.shape)
+    print(y_train.shape)
+    model = neural_network(X_train, y_train, batch_size=64)
 
     nn_predict(model, X_test, y_test, fold_num)
 
@@ -96,11 +98,12 @@ def nn_predict(model, test_vector, test_bt_easiness, k_val=0):
   return results
 
 if __name__ == "__main__":
-  
+  """
   # Testing data
   test_vector = create_new_features(type="test")
   test_vector = test_vector.astype('float32')
   test_bt_easiness = bt_easiness_test_data()
   test_bt_easiness = test_bt_easiness.astype('float32')
+  """
 
   nn_train()
