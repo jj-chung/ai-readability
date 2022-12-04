@@ -6,7 +6,7 @@ from raw_data import *
 from data_preprocessing import *
 import matplotlib.pyplot as plt
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, Flatten
 from keras.utils import np_utils
 from sklearn.model_selection import KFold
 import data_preprocessing
@@ -18,7 +18,7 @@ import imbalanced
 Train a neural network using keras.
 """
 def neural_network(X_train, y_train, metrics=['mean_squared_error', 'mean_absolute_error'],
-                   activation='relu', input_shape=(None, 2037), optimizer='adam', loss='mean_squared_error',
+                   activation='relu', input_shape=(None, 2036), optimizer='adam', loss='mean_squared_error',
                    epochs=10, batch_size=64, verbose=1):
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
@@ -65,9 +65,10 @@ def nn_train(type="train"):
     # Train the model on the train data
     print(X_train.shape)
     print(y_train.shape)
-    model = neural_network(X_train, y_train, batch_size=64)
+    model = neural_network(X_train, y_train, batch_size=64, input_shape=(X_train.shape[1],))
 
-    nn_predict(model, X_test, y_test, fold_num)
+    nn_predict(model, X_train, y_train, type='train', k_val=fold_num)
+    nn_predict(model, X_test, y_test, type='test', k_val=fold_num)
 
     fold_num += 1
   
@@ -81,19 +82,20 @@ Input:
   test_vector - test vector input.
   k_val - the fold number if using k fold validation.
 """
-def nn_predict(model, test_vector, test_bt_easiness, k_val=0):
+def nn_predict(model, test_vector, test_bt_easiness, type="", k_val=0):
   predicted = model.predict(test_vector)
   MSE = mean_squared_error(predicted, test_bt_easiness)
-  _, accuracy = model.evaluate(test_vector, test_bt_easiness, verbose=0)
+
+  predicted = predicted.tolist()
+  predicted = [float(x) for x in predicted]
 
   results = {
-    "MSE": MSE,
-    "predicted_labels": predicted,
-    "accuracy": accuracy
+    "MSE": float(MSE),
+    "predicted_labels": predicted
   }
 
   # Save predictions and mean square error to json
-  with open('keras_data/MSE_and_predictions_{k_val}.json', 'w') as fp:
+  with open(f'keras_data/MSE_and_predictions_{k_val}_{type}.json', 'w') as fp:
       json.dump(results, fp)
 
   return results
