@@ -19,7 +19,7 @@ Train a neural network using keras.
 """
 def neural_network(X_train, y_train, metrics=['mean_squared_error', 'mean_absolute_error'],
                    activation='relu', input_shape=(None, 2036), optimizer='adam', loss='mean_squared_error',
-                   epochs=40, batch_size=64, verbose=1):
+                   epochs=30, batch_size=64, verbose=1):
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
     #model.add(Dropout(0.3))
@@ -50,8 +50,8 @@ def nn_train(type="train"):
   fold_num = 0
   kf = KFold(n_splits=5, shuffle=True)
 
-  print(train_vector.shape)
-  print(train_bt_easiness.shape)
+  train_errs = []
+  val_errs = []
 
   # Do k-fold validation here
   for train_index, test_index in kf.split(train_vector):
@@ -63,16 +63,28 @@ def nn_train(type="train"):
     # X_train, y_train = imbalanced.resample(X_train, y_train, sample_type=sample_type)
 
     # Train the model on the train data
-    print(X_train.shape)
-    print(y_train.shape)
     model = neural_network(X_train, y_train, batch_size=64, input_shape=(X_train.shape[1],))
 
-    nn_predict(model, X_train, y_train, type='train', k_val=fold_num)
-    nn_predict(model, X_test, y_test, type='test', k_val=fold_num)
+    results = nn_predict(model, X_train, y_train, type='train', k_val=fold_num)
+    train_MSE = results['MSE']
+  
+    results = nn_predict(model, X_test, y_test, type='test', k_val=fold_num)
+    val_MSE = results['MSE']
 
     fold_num += 1
+
+    train_errs.append(float(train_MSE))
+    val_errs.append(float(val_MSE))
   
-  return model
+  results = {
+    'avg_train_MSE': np.average(train_errs),
+    'avg_val_MSE': np.average(val_errs)
+  }
+  
+  with open(f'keras_data/MSE_and_predictions_avg.json', 'w') as fp:
+      json.dump(results, fp)
+
+  return "Avg train err: {}, Avg val err: {}".format(np.average(train_errs), np.average(val_errs))
 
 """
 Make predictions with a trained neural net model.
@@ -109,4 +121,4 @@ if __name__ == "__main__":
   test_bt_easiness = test_bt_easiness.astype('float32')
   """
 
-  nn_train()
+  print(nn_train())
