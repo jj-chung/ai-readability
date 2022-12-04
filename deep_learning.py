@@ -85,8 +85,6 @@ if __name__ == "__main__":
     # Train NN on training data 
     train_vector = data_preprocessing.create_new_features(type="train")
     #tensor1 = train_vector.astype('float32')
-    #print('SHAPE? ', tensor1.shape[0], tensor1.shape[1])
-    #print(tensor1.shape[0])
     #tensor1 = np.asarray(train_vector).astype('float32')
     train_vector_tensor = tf.convert_to_tensor(train_vector , dtype=tf.float32)
 
