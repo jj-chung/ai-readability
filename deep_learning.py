@@ -87,7 +87,7 @@ def nn_predict(model, test_vector, test_bt_easiness, type="", k_val=0):
   MSE = mean_squared_error(predicted, test_bt_easiness)
 
   predicted = predicted.tolist()
-  predicted = [float(x) for x in predicted]
+  predicted = [float(x[0]) for x in predicted]
 
   results = {
     "MSE": float(MSE),
