@@ -13,6 +13,8 @@ import data_preprocessing
 import tensorflow as tf
 import scipy as sp
 
+
+
 #stole this shit
 def neural_network(X_train, y_train, Validation_data, metrics=['mean_squared_error', 'mean_absolute_error'],
                    activation='relu', input_shape=(None, 3), optimizer='adam', loss='mean_squared_error',
@@ -26,10 +28,15 @@ def neural_network(X_train, y_train, Validation_data, metrics=['mean_squared_err
 
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
+    model.add(Dropout(0.3))
     model.add(Dense(100, activation=activation))
+    model.add(Dropout(0.3))
     model.add(Dense(50, activation=activation))
+    model.add(Dropout(0.3))
     model.add(Dense(10, activation=activation))
+    model.add(Dropout(0.3))
     model.add(Dense(5, activation=activation))
+    model.add(Dropout(0.3))
     model.add(Dense(1))
     model.summary()
     model.compile(loss=loss, metrics=metrics, optimizer=optimizer)
@@ -37,8 +44,6 @@ def neural_network(X_train, y_train, Validation_data, metrics=['mean_squared_err
         model.fit(x=X_train, y=y_train, validation_data=Validation_data, epochs=epochs, batch_size=batch_size,
                   verbose=verbose)
     else:
-        '''x1 = np.asarray(X_train).astype('float32')
-        y1 = np.asarray(y_train).astype('float32')'''
         model.fit(x=X_train, y=y_train, epochs=epochs, batch_size=batch_size, verbose=verbose)
     return model
 
