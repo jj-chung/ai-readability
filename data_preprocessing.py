@@ -21,6 +21,7 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import random
 import scipy as sp
 from transformers import AutoTokenizer
+from datasets import Dataset
 
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -28,8 +29,8 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 
 # Applies the tokenizer for bert to an example text-- includes [CLS] token (I think?)
-def tokenize(text):
-    return tokenizer(text, padding="max_length", truncation=True)
+def tokenize(data):
+    return tokenizer(data["text"], padding="max_length", truncation=True)
 
 # Gets data preprocessed into an array of label, token dicts for Bert
 def bert_pre_processing(type="train"):
@@ -42,9 +43,14 @@ def bert_pre_processing(type="train"):
   # merge labels and data 
   labels = mpaa_pre_processing(type=type)
 
+  def gen(data, labels):
+    for i, label in enumerate(labels):
+      yield {"text": data[i], "label": label}
+  data_set = Dataset.from_generator(gen, gen_kwargs={"data": data, "labels": labels})
+
   # structure data like: https://huggingface.co/docs/transformers/training#train-with-pytorch-trainer
-  data_set = [{'label': label, 'text': tokenize(data[i])} for i, label in enumerate(labels)]
-  return data_set
+  # data_set = [{'label': label, 'text': tokenize()} for i, label in enumerate(labels)]
+  return data_set.map(tokenize, batched=True)
 
 """
 Convert text to word vector.
