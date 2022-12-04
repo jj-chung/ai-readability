@@ -13,19 +13,10 @@ import data_preprocessing
 import tensorflow as tf
 import scipy as sp
 
-
-
 #stole this shit
 def neural_network(X_train, y_train, Validation_data, metrics=['mean_squared_error', 'mean_absolute_error'],
                    activation='relu', input_shape=(None, 3), optimizer='adam', loss='mean_squared_error',
                    epochs=10, batch_size=64, verbose=1):
-    """
-    We are defining a neural network function that takes into account a different set of parameters
-    that are needed to build the machine learning model and we are also giving different values
-    and it would be working with different parameters and we are able to give those values to our
-    deep learning models and we are going to return the output given by the model respectively.
-    """
-
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
     model.add(Dropout(0.3))
