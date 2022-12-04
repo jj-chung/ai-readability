@@ -86,23 +86,23 @@ if __name__ == "__main__":
     train_vector = data_preprocessing.create_new_features(type="train")
     #tensor1 = train_vector.astype('float32')
     #tensor1 = np.asarray(train_vector).astype('float32')
-    train_vector_tensor = tf.convert_to_tensor(train_vector , dtype=tf.float32)
+    train_vector_tensor = train_vector.astype('float32')
 
     train_score = bt_easiness_train_data()
     #y_train_tesor = np.asarray(train_score).astype('float32')
-    train_score_tensor = tf.convert_to_tensor(train_score , dtype=tf.float32)
+    train_score_tensor = train_score.astype('float32')
     test_vector = data_preprocessing.create_new_features(type="test")
     #tensor2 = test_vector.astype('float32')
     #tensor2 = np.asarray(test_vector).astype('float32')
-    test_vector_tensor = tf.convert_to_tensor(test_vector, dtype=tf.float32)
+    test_vector_tensor = test_vector.astype('float32')
 
     test_score = bt_easiness_test_data()
     #test_score_tensor = np.asarray(test_score).astype('float32')
-    test_score_tensor = tf.convert_to_tensor(test_score , dtype=tf.float32)
+    test_score_tensor = test_score.astype('float32')
     '''model = train_nn(train_vector, train_score)
     accuracy = predict_nn(model, test_vector, test_score)
     print('nn accuracy:', accuracy)'''
 
     model1 = neural_network(X_train=train_vector_tensor, y_train=train_score_tensor, Validation_data=None, batch_size=64)
     predicted = model1.predict(test_vector_tensor)
-    print(mean_squared_error(predicted, np.asarray(test_score).astype('float32')))
+    print(mean_squared_error(predicted, test_score_tensor))

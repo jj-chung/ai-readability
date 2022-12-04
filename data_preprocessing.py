@@ -20,13 +20,8 @@ import matplotlib
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import random
 import scipy as sp
-<<<<<<< HEAD
 from sklearn import preprocessing
-# from transformers import AutoTokenizer
-=======
-from transformers import AutoTokenizer
 from datasets import Dataset
->>>>>>> 6a9c773f8366d921ef7fcbc75eb6e108d0267eac
 
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
