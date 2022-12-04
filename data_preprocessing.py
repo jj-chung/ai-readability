@@ -1,8 +1,9 @@
 from raw_data import *
 import sklearn
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -10,6 +11,9 @@ nltk.download('wordnet')
 from nltk.stem import WordNetLemmatizer 
 import contractions
 import spacy
+from spacy_syllables import SpacySyllables
+from spacy.lang.en import English
+from spacy.pipeline import Sentencizer
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import matplotlib
@@ -17,13 +21,14 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import random
 import scipy as sp
 from sklearn import preprocessing
-from datasets import Dataset
+# from datasets import Dataset
 
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 
+"""
 # Applies the tokenizer for bert to an example text-- includes [CLS] token (I think?)
 def tokenize(data):
     return tokenizer(data["text"], padding="max_length", truncation=True)
@@ -47,6 +52,7 @@ def bert_pre_processing(type="train"):
   # structure data like: https://huggingface.co/docs/transformers/training#train-with-pytorch-trainer
   # data_set = [{'label': label, 'text': tokenize()} for i, label in enumerate(labels)]
   return data_set.map(tokenize, batched=True)
+"""
 
 """
 Convert text to word vector.

@@ -10,7 +10,6 @@ from keras.layers import Dense, Dropout
 from keras.utils import np_utils
 from sklearn.model_selection import KFold
 import data_preprocessing
-import tensorflow as tf
 import scipy as sp
 import json
 import imbalanced
@@ -55,9 +54,9 @@ def nn_train(type="train"):
 
   # Do k-fold validation here
   for train_index, test_index in kf.split(train_vector):
-    print(f'Training on fold {fold_num}')
+    print('Training on fold {}'.format(fold_num))
     X_train, X_test = train_vector[train_index], train_vector[test_index]
-    y_train, y_test = test_vector[train_index], test_vector[test_index]
+    y_train, y_test = train_bt_easiness[train_index], train_bt_easiness[test_index]
 
     #Resample the training data
     # X_train, y_train = imbalanced.resample(X_train, y_train, sample_type=sample_type)
@@ -91,7 +90,7 @@ def nn_predict(model, test_vector, test_bt_easiness, k_val=0):
   }
 
   # Save predictions and mean square error to json
-  with open(f'keras_data/MSE_and_predictions_{k_val}.json', 'w') as fp:
+  with open('keras_data/MSE_and_predictions_{k_val}.json', 'w') as fp:
       json.dump(results, fp)
 
   return results
@@ -99,7 +98,9 @@ def nn_predict(model, test_vector, test_bt_easiness, k_val=0):
 if __name__ == "__main__":
   
   # Testing data
-  test_vector = data_preprocessing.create_new_features(type="test")
+  test_vector = create_new_features(type="test")
   test_vector = test_vector.astype('float32')
   test_bt_easiness = bt_easiness_test_data()
   test_bt_easiness = test_bt_easiness.astype('float32')
+
+  nn_train()
