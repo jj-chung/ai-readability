@@ -31,31 +31,29 @@ from keras.callbacks import EarlyStopping
 """
 Train a neural network using keras.
 """
-def neural_network(X_train, y_train, metrics=['mean_squared_error', 'mean_absolute_error'],
+def neural_network(X_train, y_train, valid_set=[], metrics=['mean_squared_error', 'mean_absolute_error'],
                    activation='relu', input_shape=(None, 2036), optimizer='adam', loss='mean_squared_error',
-                   epochs=30, batch_size=64, verbose=1):
+                   epochs=10, batch_size=64, verbose=1):
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
-    #model.add(Dropout(0.3))
-    model.add(Dense(300, activation=activation))
+    # model.add(Dropout(0.3))
     model.add(Dense(100, activation=activation))
-    #model.add(Dropout(0.3))
+    # model.add(Dropout(0.3))
     model.add(Dense(50, activation=activation))
-    #model.add(Dropout(0.3))
-    model.add(Dense(20, activation=activation))
+    # model.add(Dropout(0.3))
     model.add(Dense(10, activation=activation))
-    #model.add(Dropout(0.3))
+    # model.add(Dropout(0.3))
     model.add(Dense(5, activation=activation))
-    #model.add(Dropout(0.3))
+    # model.add(Dropout(0.3))
     model.add(Dense(1))
     model.summary()
     model.compile(loss=loss, metrics=metrics, optimizer=optimizer)
 
-    model.fit(x=X_train, y=y_train, epochs=epochs, batch_size=batch_size, verbose=verbose)
+    history = model.fit(x=X_train, y=y_train, epochs=epochs, validation_data=valid_set, batch_size=batch_size, verbose=verbose)
     
-    return model
+    return history, model
 
-def RNN(X_train, y_train, metrics=['mean_squared_error', 'mean_absolute_error'],
+def RNN(X_train, y_train, valid_set, metrics=['mean_squared_error', 'mean_absolute_error'],
                    activation='relu', input_shape=(None, 2036), optimizer='adam', loss='mean_squared_error',
                    epochs=40, batch_size=64, verbose=1):
   max_words = 2000
@@ -76,11 +74,11 @@ def RNN(X_train, y_train, metrics=['mean_squared_error', 'mean_absolute_error'],
   model.compile(loss=loss,optimizer=optimizer,metrics=metrics)
 
   model.fit(sequences_matrix, y_train,batch_size=batch_size,epochs=epochs,
-          validation_split=0.2,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
+          validation_data=valid_set,callbacks=[EarlyStopping(monitor='val_loss',min_delta=0.0001)])
 
   return model
 
-def nn_train(type="train"):
+def nn_train(type="train", kfold=True):
   # Train NN on training data 
   all_data = create_new_features(type=type, preprocessed=True)
   train_vector = all_data[:, :-1]
@@ -94,34 +92,58 @@ def nn_train(type="train"):
   train_errs = []
   val_errs = []
 
+  if not kfold:
+    X_train = train_vector
+    y_train = train_bt_easiness
+
+    all_data = create_new_features(type="test", preprocessed=True)
+    test_vector = all_data[:, :-1]
+    X_test = test_vector.astype('float32')
+    test_bt_easiness = all_data[:, -1]
+    y_test = test_bt_easiness.astype('float32')
+
+    # Train the model on the train data
+    history, model = neural_network(X_train, y_train, batch_size=64, input_shape =(X_train.shape[1],))
+
+    results_train = nn_predict(model, X_test, y_test, type='train', k_val=fold_num)
+    train_MSE = results_train['MSE']
+    
+    return train_MSE
+
   # Do k-fold validation here
   for train_index, test_index in kf.split(train_vector):
     print('Training on fold {}'.format(fold_num))
     X_train, X_test = train_vector[train_index], train_vector[test_index]
     y_train, y_test = train_bt_easiness[train_index], train_bt_easiness[test_index]
 
-    #Resample the training data
-    # X_train, y_train = imbalanced.resample(X_train, y_train, sample_type=sample_type)
-
     # Train the model on the train data
-    model = neural_network(X_train, y_train, batch_size=64, input_shape =(X_train.shape[1],))
+    history, model = neural_network(X_train, y_train, batch_size=64, input_shape =(X_train.shape[1],))
 
-    results = nn_predict(model, X_train, y_train, type='train', k_val=fold_num)
-    train_MSE = results['MSE']
+    results_train = nn_predict(model, X_train, y_train, type='train', k_val=fold_num)
+    train_MSE = results_train['MSE']
   
-    results = nn_predict(model, X_test, y_test, type='test', k_val=fold_num)
-    val_MSE = results['MSE']
+    results_val = nn_predict(model, X_test, y_test, type='test', k_val=fold_num)
+    val_MSE = results_val['MSE']
 
     fold_num += 1
 
     train_errs.append(float(train_MSE))
     val_errs.append(float(val_MSE))
   
+    # Plot the train vs validation error to check for overfitting
+    plt.plot(history.history['mean_squared_error'], color='red')
+    plt.plot(history.history['val_mean_squared_error'], color = 'blue')
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'val'], loc='upper left')
+    plt.savefig('images/keras_err_curves.png')
+
   results = {
     'avg_train_MSE': np.average(train_errs),
     'avg_val_MSE': np.average(val_errs)
   }
-  
+
   with open(f'keras_data/MSE_and_predictions_avg.json', 'w') as fp:
       json.dump(results, fp)
 

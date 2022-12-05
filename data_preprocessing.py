@@ -25,6 +25,10 @@ import json
 from json import JSONEncoder
 import h5py
 from pathlib import Path
+from gensim.models import Word2Vec, Doc2Vec
+from gensim.models.doc2vec import TaggedDocument
+from sklearn import utils
+from tqdm import tqdm
 
 # from datasets import Dataset
 # from transformers import AutoTokenizer
@@ -70,14 +74,55 @@ Convert text to word vector.
 Input: Flag for determining whether data is test or train.
 """
 def word_vectorizer(type="train"):
-  text = text_pre_processing(type)
-
+  """
   count_vect = sklearn.feature_extraction.text.CountVectorizer(max_features=2000)
   X_train_counts = count_vect.fit_transform(text)
   #print('vect_length: ', X_train_counts.shape[0], X_train_counts.shape[1], X_train_counts)
   tfidf_transformer = TfidfTransformer()
   X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
   return X_train_tfidf
+  """
+  data_excerpts = text_train_data()
+  vectorizer = TfidfVectorizer(max_features=10000)
+  X = vectorizer.fit_transform(data_excerpts)
+
+  return X
+
+"""
+Use word2vec embedding/representation to convert data into vectors instead of
+tfidf.
+"""
+def word_vectorizer_word2vec(type="train"):
+    text_data = text_pre_processing()
+    nlp = spacy.load("en_core_web_sm")
+    nlp.add_pipe('sentencizer')
+
+    sentences = []
+
+    for i, excerpt in enumerate(text_data):
+      doc = nlp(excerpt)
+      td = TaggedDocument([token.text for token in doc if (not token.is_punct and token.text != '\n')], [i])
+      sentences.append(td)
+
+    train_tagged_list = sentences
+          
+    model_dbow = Doc2Vec(dm=0, vector_size=1000, negative=5, hs=0, min_count=2, sample = 0)
+    model_dbow.build_vocab(train_tagged_list)
+    
+    for epoch in range(30):
+        random.shuffle(train_tagged_list)
+        model_dbow.train(train_tagged_list, total_examples=len(train_tagged_list), epochs=1)
+        model_dbow.alpha -= 0.002
+        model_dbow.min_alpha = model_dbow.alpha
+
+    X_train = vec_for_learning(model_dbow, sentences)
+
+    return X_train
+  
+def vec_for_learning(model, sentences):
+    sents = sentences
+    regressors = [model.infer_vector(doc.words) for doc in sents]
+    return regressors
 
 """
 Further pre-process the data to exclude stop words. Also use text tokenization
@@ -146,9 +191,25 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
 
   avg_word_length = []
   avg_sentence_length = []
+  non_unique_word_ct = []
   unique_word_ct = []
   avg_syllables = []
   num_punct_arr = []
+  orig_len = []
+  lemma_ct = []
+  lemma_len = []
+  len_ratio = []
+  lemma_ratio = []
+  max_word_len = []
+  words_per_sentence = []
+
+  # punctuation
+  commas = []
+  semicolons = []
+  exclamations = []
+  questions = []
+  quotes = []
+  periods = []
 
   pos_dict = {}
   for key in ['ADJ', 'ADP', 'PUNCT', 'ADV', 'AUX', 'SYM', 'INTJ', 'CCONJ',	'X',
@@ -175,20 +236,43 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
     if i % 200 == 0:
       print(f'Excerpts Preprocessed: {i}')
 
-    # Compute average word length for the excerpt
     doc = nlp(excerpt)
+
+    # Add the length of the excerpt before preprocessing
+    ex_length = len(excerpt)
+    orig_len.append(ex_length)
+
+    # Add number of lemmas and length of text if we only count lemmas
+    lemmas = [token.lemma_ for token in doc if (not token.is_punct and token.text != '\n')]
+    lemma_ct.append(len(lemmas))
+    lemma_length = len(" ".join(lemmas))
+    lemma_len.append(lemma_length)
+    len_ratio.append(lemma_length / ex_length)
+    lemma_ratio.append(len(lemmas) / ex_length)
+
+    # Compute average word length for the excerpt
     words = [token.text for token in doc if (not token.is_punct and token.text != '\n')]
     syllables_list = [token._.syllables_count for token in doc if (not token.is_punct and token.text != '\n')]
-    punctuation_list = [token._.syllables_count for token in doc if (token.is_punct and token.text != '\n')]
+    punctuation_list = [token.text for token in doc if (token.is_punct and token.text != '\n')]
+
+    commas.append(excerpt.count(","))
+    semicolons.append(excerpt.count(";"))
+    exclamations.append(excerpt.count("!"))
+    questions.append(excerpt.count("?"))
+    quotes.append(excerpt.count('"'))
+    periods.append(excerpt.count('.'))
 
     total_avg = sum( map(len, words) ) / len(words)
     avg_word_length.append(total_avg)
 
+    # Maximum word length
+    max_word_len.append(len(max(words, key =len)))
+
     # Compute average sentence length for the excerpt
     sentences = [sent for sent in doc.sents]
-
     total_avg = sum( map(len, sentences) ) / len(sentences)
     avg_sentence_length.append(total_avg)
+    words_per_sentence.append(len(words)/len(sentences))
 
     pos_dict_excerpt = {}
     verbForms_excerpt = {}
@@ -210,8 +294,8 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
     word_lists = [word_pos, word_verbForm, word_tense]
     
     # Create a dictionary from tense/verbform/pos to counts
-    for i, word_dict in enumerate(word_dicts):
-      word_list = word_lists[i]
+    for j, word_dict in enumerate(word_dicts):
+      word_list = word_lists[j]
       for attribute in word_list:
         if attribute not in word_dict:
           word_dict[attribute] = 1
@@ -219,8 +303,8 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
           word_dict[attribute] += 1
 
     # Append each counts dictionary respective feature vector
-    for i, overall_word_dict in enumerate(overall_word_dicts):
-      word_dict = word_dicts[i]
+    for k, overall_word_dict in enumerate(overall_word_dicts):
+      word_dict = word_dicts[k]
 
       for key in overall_word_dict:
         if key in word_dict:
@@ -235,6 +319,7 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
 
     # Consider the number of unique words in the text
     unique_word_ct.append(len(set(words)))
+    non_unique_word_ct.append(len(words))
 
     # Consider the average number of syllables
     syllables_list = [s_count for s_count in syllables_list if s_count is not None]
@@ -260,21 +345,33 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
                                   avg_sentence_length, 
                                   num_punct_arr,
                                   unique_word_ct, 
-                                  avg_syllables))
+                                  non_unique_word_ct,
+                                  avg_syllables, 
+                                  orig_len,
+                                  lemma_ct,
+                                  lemma_len,
+                                  lemma_ratio,
+                                  len_ratio,
+                                  max_word_len))
+
 
   # Append additional spacy NLP characteristics
   for word_dict in overall_word_dicts:
     for attribute in word_dict:
       features_arr = np.column_stack((features_arr, word_dict[attribute]))
 
-  # Append all the TFIDF vectorizations
-  word_vectors = word_vectorizer(type="train").toarray()
-
-  features_arr = np.column_stack((word_vectors, features_arr))
 
   # Normalize X-features to have zero mean and unit variance
   scaler = preprocessing.StandardScaler().fit(features_arr)
   features_arr = scaler.transform(features_arr)
+
+  # Append all the word2vec vectorizations
+  # word_vectors = word_vectorizer_word2vec(type="train")
+  # features_arr = np.column_stack((word_vectors, features_arr))
+
+  # Append all the TFIDF vectorizations
+  word_vectors = word_vectorizer(type="train").toarray()
+  features_arr = np.column_stack((word_vectors, features_arr))
 
   # Tack on y-data, i.e. bt-easiness
   features_arr = np.column_stack((features_arr, bt_easiness))

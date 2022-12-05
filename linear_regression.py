@@ -82,7 +82,7 @@ def create_plot(X, y, y_pred):
   Run the regression on train data for the CEFR ratings. One baseline.
 """
 def cefr_baseline():
-  data = cefr_train()
+  data = cefr_baseline("train")
   X = data[:, [0, 1]]
   y = data[:, 2]
   return regression(X, y)
@@ -104,11 +104,15 @@ def sentence_word_len(baseline):
   Run regression with the bag-of-words representation.
 """
 def bag_of_words_regression():
-  X = word_vectorizer_train()
+  X = word_vectorizer("train")
   y = bt_easiness_train_data()
   return regression(X, y)
 
-def regression(X, y, ridge=False):
+def regression(X, y, ridge=False, kfold=True):
+  if not kfold:
+    reg = train_regression(X, y, ridge)
+    return reg
+
   kf = KFold(n_splits = 5)
   train_errs = []
   val_errs = []
