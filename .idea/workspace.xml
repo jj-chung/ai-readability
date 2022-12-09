@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="ee10547e-6801-41a5-80c7-f23c653086ab" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/keras_data/MSE_and_predictions_4_train.json" beforeDir="false" afterPath="$PROJECT_DIR$/keras_data/MSE_and_predictions_4_train.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keras_data/MSE_and_predictions_avg.json" beforeDir="false" afterPath="$PROJECT_DIR$/keras_data/MSE_and_predictions_avg.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IgnoredFileRootStore">
+    <option name="generatedRoots">
+      <set>
+        <option value="$PROJECT_DIR$/.idea" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectId" id="2GT5nZgs0gah4o3BkCa98aZTJxO" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RunManager" selected="Python.deep_learning">
+    <configuration name="data_processing" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ai-readability" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_processing.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="deep_learning" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/mlenv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/deep_learning.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="linear_regression" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/mlenv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/linear_regression.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="mpaa_rating" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/opt/anaconda3/envs/mlenv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mpaa_rating.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="nn" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ai-readability" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/nn.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.deep_learning" />
+        <item itemvalue="Python.linear_regression" />
+        <item itemvalue="Python.mpaa_rating" />
+        <item itemvalue="Python.data_processing" />
+        <item itemvalue="Python.nn" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ee10547e-6801-41a5-80c7-f23c653086ab" name="Default Changelist" comment="" />
+      <created>1666399900845</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1666399900845</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="549" y="202" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1666560015784">
+      <screen x="0" y="25" width="1792" height="1037" />
+    </state>
+    <state x="549" y="202" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.25.1792.1037@0.25.1792.1037" timestamp="1666560015784" />
+    <state x="805" y="349" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1670453805229">
+      <screen x="0" y="25" width="1792" height="1033" />
+    </state>
+    <state x="863" y="-744" key="#com.intellij.fileTypes.FileTypeChooser/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670228807234" />
+    <state x="805" y="349" key="#com.intellij.fileTypes.FileTypeChooser/0.25.1792.1033@0.25.1792.1033" timestamp="1670453805229" />
+    <state x="805" y="349" key="#com.intellij.fileTypes.FileTypeChooser/0.25.1792.1035@0.25.1792.1035" timestamp="1670216516041" />
+    <state x="821" y="140" key="#deep_learning" timestamp="1670201439676">
+      <screen x="0" y="25" width="1792" height="1035" />
+    </state>
+    <state x="821" y="140" key="#deep_learning/0.25.1792.1035@0.25.1792.1035" timestamp="1670201439676" />
+    <state x="821" y="140" key="#linear_regression" timestamp="1670202270434">
+      <screen x="0" y="25" width="1792" height="1035" />
+    </state>
+    <state x="821" y="140" key="#linear_regression/0.25.1792.1035@0.25.1792.1035" timestamp="1670202270434" />
+    <state x="821" y="139" key="#mpaa_rating" timestamp="1670453868497">
+      <screen x="0" y="25" width="1792" height="1033" />
+    </state>
+    <state x="821" y="139" key="#mpaa_rating/0.25.1792.1033@0.25.1792.1033" timestamp="1670453868497" />
+    <state x="733" y="144" key="CommitChangelistDialog2" timestamp="1670116594380">
+      <screen x="0" y="25" width="1792" height="1033" />
+    </state>
+    <state x="733" y="144" key="CommitChangelistDialog2/0.25.1792.1033@0.25.1792.1033" timestamp="1670116594380" />
+    <state x="872" y="315" key="FileChooserDialogImpl" timestamp="1669533148002">
+      <screen x="0" y="25" width="1792" height="1034" />
+    </state>
+    <state x="872" y="315" key="FileChooserDialogImpl/0.25.1792.1034@0.25.1792.1034" timestamp="1669533148002" />
+    <state x="872" y="316" key="FileChooserDialogImpl/0.25.1792.1036@0.25.1792.1036" timestamp="1666567101857" />
+    <state width="1355" height="253" key="GridCell.Tab.0.bottom" timestamp="1670573624594">
+      <screen x="0" y="25" width="1792" height="1034" />
+    </state>
+    <state width="1355" height="292" key="GridCell.Tab.0.bottom/0.-1055.1920.1055/0.25.1792.1033@0.-1055.1920.1055" timestamp="1670058835971" />
+    <state width="1355" height="292" key="GridCell.Tab.0.bottom/0.-1055.1920.1055/0.25.1792.1034@0.-1055.1920.1055" timestamp="1670058395014" />
+    <state width="1355" height="292" key="GridCell.Tab.0.bottom/0.-1055.1920.1055/0.25.1792.1035@0.-1055.1920.1055" timestamp="1670057792348" />
+    <state width="1355" height="280" key="GridCell.Tab.0.bottom/0.-1055.1920.1055/0.25.1792.1036@0.-1055.1920.1055" timestamp="1667008061247" />
+    <state width="1355" height="280" key="GridCell.Tab.0.bottom/0.-1055.1920.1055/0.25.1792.1037@0.-1055.1920.1055" timestamp="1667008053258" />
+    <state width="1355" height="253" key="GridCell.Tab.0.bottom/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670233107259" />
+    <state width="1355" height="253" key="GridCell.Tab.0.bottom/0.25.1792.1033@0.25.1792.1033" timestamp="1670555793236" />
+    <state width="1355" height="253" key="GridCell.Tab.0.bottom/0.25.1792.1034@0.25.1792.1034" timestamp="1670573624594" />
+    <state width="1355" height="253" key="GridCell.Tab.0.bottom/0.25.1792.1035@0.25.1792.1035" timestamp="1670570436945" />
+    <state width="1355" height="292" key="GridCell.Tab.0.bottom/0.25.1792.1036@0.25.1792.1036" timestamp="1670212744428" />
+    <state width="1355" height="280" key="GridCell.Tab.0.bottom/0.25.1792.1037@0.25.1792.1037" timestamp="1666936827885" />
+    <state width="1355" height="253" key="GridCell.Tab.0.center" timestamp="1670573624594">
+      <screen x="0" y="25" width="1792" height="1034" />
+    </state>
+    <state width="1355" height="292" key="GridCell.Tab.0.center/0.-1055.1920.1055/0.25.1792.1033@0.-1055.1920.1055" timestamp="1670058835970" />
+    <state width="1355" height="292" key="GridCell.Tab.0.center/0.-1055.1920.1055/0.25.1792.1034@0.-1055.1920.1055" timestamp="1670058395013" />
+    <state width="1355" height="292" key="GridCell.Tab.0.center/0.-1055.1920.1055/0.25.1792.1035@0.-1055.1920.1055" timestamp="1670057792347" />
+    <state width="1355" height="280" key="GridCell.Tab.0.center/0.-1055.1920.1055/0.25.1792.1036@0.-1055.1920.1055" timestamp="1667008061246" />
+    <state width="1355" height="280" key="GridCell.Tab.0.center/0.-1055.1920.1055/0.25.1792.1037@0.-1055.1920.1055" timestamp="1667008053257" />
+    <state width="1355" height="253" key="GridCell.Tab.0.center/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670233107258" />
+    <state width="1355" height="253" key="GridCell.Tab.0.center/0.25.1792.1033@0.25.1792.1033" timestamp="1670555793235" />
+    <state width="1355" height="253" key="GridCell.Tab.0.center/0.25.1792.1034@0.25.1792.1034" timestamp="1670573624594" />
+    <state width="1355" height="253" key="GridCell.Tab.0.center/0.25.1792.1035@0.25.1792.1035" timestamp="1670570436944" />
+    <state width="1355" height="292" key="GridCell.Tab.0.center/0.25.1792.1036@0.25.1792.1036" timestamp="1670212744428" />
+    <state width="1355" height="280" key="GridCell.Tab.0.center/0.25.1792.1037@0.25.1792.1037" timestamp="1666936827884" />
+    <state width="1355" height="253" key="GridCell.Tab.0.left" timestamp="1670573624593">
+      <screen x="0" y="25" width="1792" height="1034" />
+    </state>
+    <state width="1355" height="292" key="GridCell.Tab.0.left/0.-1055.1920.1055/0.25.1792.1033@0.-1055.1920.1055" timestamp="1670058835970" />
+    <state width="1355" height="292" key="GridCell.Tab.0.left/0.-1055.1920.1055/0.25.1792.1034@0.-1055.1920.1055" timestamp="1670058395013" />
+    <state width="1355" height="292" key="GridCell.Tab.0.left/0.-1055.1920.1055/0.25.1792.1035@0.-1055.1920.1055" timestamp="1670057792347" />
+    <state width="1355" height="280" key="GridCell.Tab.0.left/0.-1055.1920.1055/0.25.1792.1036@0.-1055.1920.1055" timestamp="1667008061245" />
+    <state width="1355" height="280" key="GridCell.Tab.0.left/0.-1055.1920.1055/0.25.1792.1037@0.-1055.1920.1055" timestamp="1667008053256" />
+    <state width="1355" height="253" key="GridCell.Tab.0.left/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670233107257" />
+    <state width="1355" height="253" key="GridCell.Tab.0.left/0.25.1792.1033@0.25.1792.1033" timestamp="1670555793235" />
+    <state width="1355" height="253" key="GridCell.Tab.0.left/0.25.1792.1034@0.25.1792.1034" timestamp="1670573624593" />
+    <state width="1355" height="253" key="GridCell.Tab.0.left/0.25.1792.1035@0.25.1792.1035" timestamp="1670570436942" />
+    <state width="1355" height="292" key="GridCell.Tab.0.left/0.25.1792.1036@0.25.1792.1036" timestamp="1670212744428" />
+    <state width="1355" height="280" key="GridCell.Tab.0.left/0.25.1792.1037@0.25.1792.1037" timestamp="1666936827883" />
+    <state width="1355" height="253" key="GridCell.Tab.0.right" timestamp="1670573624594">
+      <screen x="0" y="25" width="1792" height="1034" />
+    </state>
+    <state width="1355" height="292" key="GridCell.Tab.0.right/0.-1055.1920.1055/0.25.1792.1033@0.-1055.1920.1055" timestamp="1670058835971" />
+    <state width="1355" height="292" key="GridCell.Tab.0.right/0.-1055.1920.1055/0.25.1792.1034@0.-1055.1920.1055" timestamp="1670058395014" />
+    <state width="1355" height="292" key="GridCell.Tab.0.right/0.-1055.1920.1055/0.25.1792.1035@0.-1055.1920.1055" timestamp="1670057792347" />
+    <state width="1355" height="280" key="GridCell.Tab.0.right/0.-1055.1920.1055/0.25.1792.1036@0.-1055.1920.1055" timestamp="1667008061246" />
+    <state width="1355" height="280" key="GridCell.Tab.0.right/0.-1055.1920.1055/0.25.1792.1037@0.-1055.1920.1055" timestamp="1667008053257" />
+    <state width="1355" height="253" key="GridCell.Tab.0.right/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670233107258" />
+    <state width="1355" height="253" key="GridCell.Tab.0.right/0.25.1792.1033@0.25.1792.1033" timestamp="1670555793236" />
+    <state width="1355" height="253" key="GridCell.Tab.0.right/0.25.1792.1034@0.25.1792.1034" timestamp="1670573624594" />
+    <state width="1355" height="253" key="GridCell.Tab.0.right/0.25.1792.1035@0.25.1792.1035" timestamp="1670570436945" />
+    <state width="1355" height="292" key="GridCell.Tab.0.right/0.25.1792.1036@0.25.1792.1036" timestamp="1670212744428" />
+    <state width="1355" height="280" key="GridCell.Tab.0.right/0.25.1792.1037@0.25.1792.1037" timestamp="1666936827884" />
+    <state width="1355" height="329" key="GridCell.Tab.1.bottom" timestamp="1670221000348">
+      <screen x="0" y="-1055" width="1920" height="993" />
+    </state>
+    <state width="1355" height="329" key="GridCell.Tab.1.bottom/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670221000348" />
+    <state width="1355" height="329" key="GridCell.Tab.1.center" timestamp="1670221000348">
+      <screen x="0" y="-1055" width="1920" height="993" />
+    </state>
+    <state width="1355" height="329" key="GridCell.Tab.1.center/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670221000348" />
+    <state width="1355" height="329" key="GridCell.Tab.1.left" timestamp="1670221000347">
+      <screen x="0" y="-1055" width="1920" height="993" />
+    </state>
+    <state width="1355" height="329" key="GridCell.Tab.1.left/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670221000347" />
+    <state width="1355" height="329" key="GridCell.Tab.1.right" timestamp="1670221000348">
+      <screen x="0" y="-1055" width="1920" height="993" />
+    </state>
+    <state width="1355" height="329" key="GridCell.Tab.1.right/0.-1055.1920.993/0.25.1792.1095@0.-1055.1920.993" timestamp="1670221000348" />
+    <state x="592" y="177" key="SettingsEditor" timestamp="1670201427460">
+      <screen x="0" y="25" width="1792" height="1035" />
+    </state>
+    <state x="592" y="177" key="SettingsEditor/0.25.1792.1034@0.25.1792.1034" timestamp="1669533659336" />
+    <state x="592" y="177" key="SettingsEditor/0.25.1792.1035@0.25.1792.1035" timestamp="1670201427460" />
+    <state x="592" y="177" key="SettingsEditor/0.25.1792.1036@0.25.1792.1036" timestamp="1666567111052" />
+    <state x="549" y="372" key="com.intellij.ide.util.TipDialog" timestamp="1670141342446">
+      <screen x="0" y="25" width="1792" height="1033" />
+    </state>
+    <state x="549" y="372" key="com.intellij.ide.util.TipDialog/0.25.1792.1033@0.25.1792.1033" timestamp="1670141342446" />
+    <state x="549" y="372" key="com.intellij.ide.util.TipDialog/0.25.1792.1034@0.25.1792.1034" timestamp="1669853084920" />
+    <state x="549" y="373" key="com.intellij.ide.util.TipDialog/0.25.1792.1036@0.25.1792.1036" timestamp="1666850090880" />
+    <state x="549" y="373" key="com.intellij.ide.util.TipDialog/0.25.1792.1037@0.25.1792.1037" timestamp="1666924054172" />
+    <state x="769" y="256" width="670" height="676" key="search.everywhere.popup" timestamp="1669532079942">
+      <screen x="0" y="25" width="1792" height="1034" />
+    </state>
+    <state x="769" y="256" width="670" height="676" key="search.everywhere.popup/0.25.1792.1034@0.25.1792.1034" timestamp="1669532079942" />
+  </component>
+</project>

@@ -63,7 +63,7 @@ Input:
   word_vectors - tfidf vectorization for training data
   mpaa_ratings - target variable/training labels (Numbers from 1 to 4, G to R)
 """
-def train_NB_model(word_vectors, mpaa_ratings, sample_type, do_k_fold=True):
+def train_NB_model(word_vectors, mpaa_ratings, sample_type, do_k_fold=False):
   if do_k_fold:
     k_fold_validation(MultinomialNB(), word_vectors, mpaa_ratings, "NB", sample_type)
   else:
@@ -221,8 +221,8 @@ def predict_model(model, test_vectors, test_target, sample_type="Imbalanced", mo
       "Mature_correct": float(Mature_correct)
   }
       
-  with open(f'mpaa_data/test_eval_metrics_{model_type}_{k_val}_{sample_type}.json', 'w') as fp:
-    json.dump(eval_metrics, fp)
+  #with open(f'mpaa_data/test_eval_metrics_{model_type}_{k_val}_{sample_type}.json', 'w') as fp:
+    #json.dump(eval_metrics, fp)
 
   # Create a confusion matrix
   if conf_matrix:
@@ -231,7 +231,7 @@ def predict_model(model, test_vectors, test_target, sample_type="Imbalanced", mo
     cm_display.plot()
     plt.rcParams.update({'font.size': 20})
     plt.title(f"Confusion Matrix for {model_type}")
-    plt.savefig(f"images/Confusion_Matrix_{model_type}_k={k_val}_{sample_type}")
+    plt.savefig(f"Confusion_Matrix_{model_type}_k={k_val}_{sample_type}")
 
   return eval_metrics
 
@@ -266,16 +266,18 @@ def train_model(train_vector, train_labels, model_type, sample_type="Imbalanced"
 
 if __name__ == "__main__":
   #---Vectorizing Data---
-  train_vector = data_preprocessing.word_vectorizer_train(type="train")
+  train_vector = data_preprocessing.word_vectorizer(type="train")
   train_labels = data_preprocessing.mpaa_pre_processing(type="train")
-  test_vector = data_preprocessing.word_vectorizer_train(type="test")
+  test_vector = data_preprocessing.word_vectorizer(type="test")
   test_labels = data_preprocessing.mpaa_pre_processing(type="test")
 
   # array of (model,sample) pairs to train and run 
   # ['knn', 'nb', 'svm', 'adaboost', 'adaboost_nb'] X 'Imbalanced', 'RUS', 'TomekLinks', 'ENN', 'ROS', 'SMOTE', 'SMOTETomek'
-  choo_choo_trains = [('adaboost', 'ROS')]
+  '''choo_choo_trains = [('adaboost', 'ROS')]
 
   for train in choo_choo_trains:
     model = train[0]
     sample_type = train[1]
-    train_model(train_vector, train_labels, model, sample_type=sample_type)
+    train_model(train_vector, train_labels, model, sample_type=sample_type)'''
+  model1 = train_model(train_vector, train_labels, model_type='nb', sample_type='Imbalanced')
+  predict_model(model1, test_vector, test_labels, sample_type="Imbalanced", model_type="nb", conf_matrix=True, k_val="N/A")

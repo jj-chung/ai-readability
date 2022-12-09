@@ -29,6 +29,7 @@ from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
 from sklearn import utils
 from tqdm import tqdm
+from transformers import DistilBertTokenizerFast
 
 # from datasets import Dataset
 # from transformers import AutoTokenizer
@@ -82,9 +83,14 @@ def word_vectorizer(type="train"):
   X_train_tfidf = tfidf_transformer.fit_transform(X_train_counts)
   return X_train_tfidf
   """
-  data_excerpts = text_train_data()
-  vectorizer = TfidfVectorizer(max_features=10000)
-  X = vectorizer.fit_transform(data_excerpts)
+  if type=="train":
+    data_excerpts = text_train_data()
+    vectorizer = TfidfVectorizer(max_features=10000)
+    X = vectorizer.fit_transform(data_excerpts)
+  else:
+    data_excerpts = text_test_data()
+    vectorizer = TfidfVectorizer(max_features=10000)
+    X = vectorizer.fit_transform(data_excerpts)
 
   return X
 
@@ -182,7 +188,7 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
   my_file = Path("features_arr.h5")
   if my_file.is_file() and preprocessed:
     f = h5py.File('features_arr.h5','r')
-    finalNumpyArray = f.get('features_arr').value
+    finalNumpyArray = f.get('features_arr') #.value
     return finalNumpyArray
   
   # First, get all the data
@@ -366,19 +372,19 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
   features_arr = scaler.transform(features_arr)
 
   # Append all the word2vec vectorizations
-  # word_vectors = word_vectorizer_word2vec(type="train")
-  # features_arr = np.column_stack((word_vectors, features_arr))
+  word_vectors = word_vectorizer_word2vec(type=type)
+  features_arr = np.column_stack((word_vectors, features_arr))
 
   # Append all the TFIDF vectorizations
-  word_vectors = word_vectorizer(type="train").toarray()
-  features_arr = np.column_stack((word_vectors, features_arr))
+  #word_vectors = word_vectorizer(type=type).toarray()
+  #features_arr = np.column_stack((word_vectors, features_arr))
 
   # Tack on y-data, i.e. bt-easiness
   features_arr = np.column_stack((features_arr, bt_easiness))
 
   # Save the features array in a json file
-  f = h5py.File('features_arr.h5', 'w')
-  f.create_dataset("features_arr", data=features_arr.astype('float32'))
+  '''f = h5py.File('features_arr.h5', 'w')
+  f.create_dataset("features_arr", data=features_arr.astype('float32'))'''
 
   return features_arr
 

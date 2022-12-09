@@ -32,19 +32,20 @@ from keras.callbacks import EarlyStopping
 Train a neural network using keras.
 """
 def neural_network(X_train, y_train, valid_set=[], metrics=['mean_squared_error', 'mean_absolute_error'],
-                   activation='relu', input_shape=(None, 2036), optimizer='adam', loss='mean_squared_error',
-                   epochs=10, batch_size=64, verbose=1):
+                   activation='relu', input_shape=(None, 2036), optimizer='sgd', loss='mean_squared_error',
+                   epochs=70
+                   , batch_size=60, verbose=1):
     model = Sequential()
     model.add(Dense(500, activation=activation, input_shape=input_shape))
-    # model.add(Dropout(0.3))
+    model.add(Dropout(0.2))
+    model.add(Dense(200, activation=activation)) #kernel_regularizer=regularizers.L2(0.1)
+    model.add(Dropout(0.3))
     model.add(Dense(100, activation=activation))
-    # model.add(Dropout(0.3))
-    model.add(Dense(50, activation=activation))
-    # model.add(Dropout(0.3))
+    model.add(Dropout(0.3))
     model.add(Dense(10, activation=activation))
-    # model.add(Dropout(0.3))
+    model.add(Dropout(0.3))
     model.add(Dense(5, activation=activation))
-    # model.add(Dropout(0.3))
+    model.add(Dropout(0.2))
     model.add(Dense(1))
     model.summary()
     model.compile(loss=loss, metrics=metrics, optimizer=optimizer)
@@ -55,7 +56,7 @@ def neural_network(X_train, y_train, valid_set=[], metrics=['mean_squared_error'
 
 def RNN(X_train, y_train, valid_set, metrics=['mean_squared_error', 'mean_absolute_error'],
                    activation='relu', input_shape=(None, 2036), optimizer='adam', loss='mean_squared_error',
-                   epochs=40, batch_size=64, verbose=1):
+                   epochs=70, batch_size=64, verbose=1):
   max_words = 2000
   max_len = 300
   tok = Tokenizer(num_words=max_words)
@@ -78,9 +79,9 @@ def RNN(X_train, y_train, valid_set, metrics=['mean_squared_error', 'mean_absolu
 
   return model
 
-def nn_train(type="train", kfold=True):
+def nn_train(type="train", kfold=True, test=False):
   # Train NN on training data 
-  all_data = create_new_features(type=type, preprocessed=True)
+  all_data = create_new_features(type=type, preprocessed=False)
   train_vector = all_data[:, :-1]
   train_vector = train_vector.astype('float32')
   train_bt_easiness = all_data[:, -1]
@@ -96,16 +97,23 @@ def nn_train(type="train", kfold=True):
     X_train = train_vector
     y_train = train_bt_easiness
 
-    all_data = create_new_features(type="test", preprocessed=True)
+    all_data = create_new_features(type="test", preprocessed=False)
     test_vector = all_data[:, :-1]
     X_test = test_vector.astype('float32')
     test_bt_easiness = all_data[:, -1]
     y_test = test_bt_easiness.astype('float32')
 
     # Train the model on the train data
-    history, model = neural_network(X_train, y_train, batch_size=64, input_shape =(X_train.shape[1],))
-
+    history, model = neural_network(X_train, y_train, valid_set=(X_test, y_test), input_shape =(X_train.shape[1],))
     results_train = nn_predict(model, X_test, y_test, type='train', k_val=fold_num)
+
+    '''if test == True:
+      test_data = create_new_features(type="test", preprocessed=False)
+      test_vector = test_data[:, :-1]
+      test_bt_easiness = test_data[:, -1]
+      results_test = nn_predict(model, test_vector, test_bt_easiness, type='test', k_val=fold_num)
+      return results_test['MSE']'''
+
     train_MSE = results_train['MSE']
     
     return train_MSE
@@ -117,7 +125,7 @@ def nn_train(type="train", kfold=True):
     y_train, y_test = train_bt_easiness[train_index], train_bt_easiness[test_index]
 
     # Train the model on the train data
-    history, model = neural_network(X_train, y_train, batch_size=64, input_shape =(X_train.shape[1],))
+    history, model = neural_network(X_train, y_train, valid_set=(X_test, y_test), input_shape =(X_train.shape[1],))
 
     results_train = nn_predict(model, X_train, y_train, type='train', k_val=fold_num)
     train_MSE = results_train['MSE']
@@ -131,13 +139,15 @@ def nn_train(type="train", kfold=True):
     val_errs.append(float(val_MSE))
   
     # Plot the train vs validation error to check for overfitting
+    print(history.history.keys())
     plt.plot(history.history['mean_squared_error'], color='red')
     plt.plot(history.history['val_mean_squared_error'], color = 'blue')
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
+    plt.title('Model Accuracy for TF-IDF Vectorization')
+    plt.ylabel('MSE Error')
+    plt.xlabel('Number of Epochs')
     plt.legend(['train', 'val'], loc='upper left')
-    plt.savefig('images/keras_err_curves.png')
+    plt.savefig('keras_err_curves2.png')
+    plt.show()
 
   results = {
     'avg_train_MSE': np.average(train_errs),
@@ -176,12 +186,4 @@ def nn_predict(model, test_vector, test_bt_easiness, type="", k_val=0):
   return results
 
 if __name__ == "__main__":
-  """
-  # Testing data
-  test_vector = create_new_features(type="test")
-  test_vector = test_vector.astype('float32')
-  test_bt_easiness = bt_easiness_test_data()
-  test_bt_easiness = test_bt_easiness.astype('float32')
-  """
-
-  print(nn_train())
+  print(nn_train(type="train", kfold=True, test=False))
