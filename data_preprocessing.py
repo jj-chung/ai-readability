@@ -29,13 +29,13 @@ from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
 from sklearn import utils
 from tqdm import tqdm
-from transformers import DistilBertTokenizerFast
+# from transformers import DistilBertTokenizerFast
 
 # from datasets import Dataset
 # from transformers import AutoTokenizer
 
-import os
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+# import os
+# os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
 

@@ -1,5 +1,6 @@
 import pandas as pd 
 import numpy as np
+import json
 
 """
 Return all data available (test and train).
@@ -40,6 +41,48 @@ def test_data():
   split_idx = int(0.7 * all_data.shape[0])
 
   return all_data[split_idx: , :]
+
+
+"""
+Get ids for train and test data.
+"""
+def get_ids(type): 
+  if type == "train":
+    data = train_data()
+    return data[:, 0]
+  else:
+    data = test_data()
+    return data[:, 0]
+  
+"""
+Return CEFR scores for training.
+"""
+def CEFR(type="train"):
+    # Load data from json 
+  # Opening JSON file
+  f = open('cefrDATA.json', encoding="utf8")
+
+  # returns JSON object as 
+  # a dictionary
+  data = json.load(f)
+
+  # Iterating through the json
+  # list
+  X = []
+  y = []
+
+  ids = get_ids(type)
+
+  for id in ids:
+    dict = data[id]
+    X.append(dict["cefr_lvl"])
+    y.append(dict["bt_easiness"])
+
+  X = np.array(X).reshape(1, -1).T
+  y = np.array(y).reshape(1, -1).T
+
+  return X, y
+
 
 """
 Return the array of text excerpts for training.

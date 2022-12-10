@@ -10,13 +10,13 @@ from sklearn.linear_model import Ridge
 from sklearn.model_selection import GridSearchCV
 
 def train_regression(X, y, ridge=False):
-    clf = LinearRegression()
-    alpha_range = range(2800, 3000, 10)
+  clf = LinearRegression()
+  alpha_range = range(2800, 3000, 10)
 
-    if ridge:
-      parameters = {'alpha': alpha_range}
-      ridge = Ridge()
-      clf = GridSearchCV(ridge, parameters)
+  if ridge:
+    parameters = {'alpha': alpha_range}
+    ridge = Ridge()
+    clf = GridSearchCV(ridge, parameters)
 
     clf = clf.fit(X, y)
     reg = clf.best_estimator_
@@ -24,7 +24,10 @@ def train_regression(X, y, ridge=False):
     coeffs = reg.coef_
     intercept = reg.intercept_
 
-    # Create and save plot for gridsearch
+  clf = clf.fit(X, y)
+
+  # Create and save plot for gridsearch
+  if ridge: 
     scores = clf.cv_results_['mean_test_score']
     scores = np.array(scores).reshape(len(alpha_range))
     print(scores)
@@ -40,18 +43,20 @@ def train_regression(X, y, ridge=False):
       "best_params": clf.best_params_}
 
     # create json object from dictionary
-    json_obj = json.dumps(regression_output)
+    # json_obj = json.dumps(regression_output)
 
     # open file for writing, "w" 
-    f = open("regression_output.json","w")
+    # f = open("regression_output.json","w")
 
     # write json object to file
-    f.write(json_obj)
+    # f.write(json_obj)
 
     # close file
-    f.close()
+    # f.close()
 
     return reg
+
+  return clf
 
 def predict_linear_regression(reg, X, y):
     preds = reg.predict(X)
@@ -81,24 +86,34 @@ def create_plot(X, y, y_pred):
 """
   Run the regression on train data for the CEFR ratings. One baseline.
 """
-def cefr_baseline():
-  data = cefr_baseline("train")
-  X = data[:, [0, 1]]
-  y = data[:, 2]
-  return regression(X, y)
+def cefr_baseline(train_X, train_y, test_X, test_y):
+  results = {}
+
+  clf = train_regression(train_X, train_y)
+  results["train"] = predict_linear_regression(clf, train_X, train_y)
+  results["test"] = predict_linear_regression(clf, test_X, test_y)
+
+  return results
 
 """
   Run the regression on train data for average word length and average
   sentence length (baseline) and other features (non-baseline).
 """
 def sentence_word_len(baseline):
-  data = create_new_features("train", baseline, preprocessed=True)
-  X = data[:, :-1]
-  y = data[:, -1]
-  if not baseline:
-    return regression(X, y, ridge=True)
+  train_data = create_new_features("train", baseline, preprocessed=True)
+  X_train = data[:, :-1]
+  y_train = data[:, -1]
+  
+  test_data = create_new_features("test", baseline, preprocessed=True)
+  X_test = data[:, :-1]
+  y_test = data[:, -1]
 
-  return regression(X, y)
+  # if not baseline:
+  #  return regression(X, y, ridge=True)
+
+  clf = train_regression(X, y)
+  results["train"] = predict_linear_regression(clf, X, y)
+  results["test"] = predict_linear_regression(clf, X, y)
 
 """
   Run regression with the bag-of-words representation.
@@ -131,11 +146,11 @@ def regression(X, y, ridge=False, kfold=True):
   return "Avg train err: {}, Avg val err: {}".format(np.average(train_errs), np.average(val_errs))
 
 if __name__ == "__main__":
-    # baseline: Avg train err: 0.7266013976169523, Avg val err: 0.7289265067907919
-    # print(sentence_word_len(True))
+    train_X, train_y = CEFR("train")
+    test_X, test_y = CEFR("test")
+    print(cefr_baseline())
 
-    # Non-baseline regression with additional NLP features
-    print(sentence_word_len(False))
+    sentence_word_len
 
     # Create a plot of CEFR data against BT_easiness with the regression line for baseline
     # create_plot(X, y, preds)
