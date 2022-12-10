@@ -12,7 +12,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn import metrics
 from sklearn.metrics import confusion_matrix, plot_confusion_matrix
-from sklearn.metrics import accuracy_score, classification_report, f1_score
+from sklearn.metrics import accuracy_score, classification_report, f1_score, recall_score, precision_score
 from sklearn.svm import SVC
 from sklearn.ensemble import AdaBoostClassifier
 
@@ -130,7 +130,7 @@ def train_KNN_model(word_vectors, mpaa_ratings, sample_type, do_k_fold=True):
     with open('mpaa_data/optimal_KNN_params.json', 'w') as fp:
       json.dump(optim_params, fp)
 
-  return model
+    return model
 
 """
 Perform k-fold validation for a model, a training dataset, and a k value.
@@ -148,6 +148,8 @@ def k_fold_validation(clf, train_vectors, train_ratings, model_type, sample_type
   avg_eval_metrics = {
       "accuracy_score" : [],
       "f1_score": [],
+      'recall': [],
+      'precision': [],
       "Mature_correct": []
   }
 
@@ -218,6 +220,8 @@ def predict_model(model, test_vectors, test_target, sample_type="Imbalanced", mo
       "predict_labels" : predicted_ratings.tolist(),
       "accuracy_score" : float(accuracy_score(test_target, predicted_ratings)), 
       "f1_score": float(f1_score(test_target, predicted_ratings, average='weighted')),
+      "recall": float(recall_score(test_target, predicted_ratings, average='weighted')),
+      'precision': float(precision_score(test_target, predicted_ratings, average='weighted')),
       "Mature_correct": float(Mature_correct)
   }
       
@@ -267,13 +271,17 @@ def train_model(train_vector, train_labels, model_type, sample_type="Imbalanced"
 if __name__ == "__main__":
   #---Vectorizing Data---
   train_vector = data_preprocessing.word_vectorizer(type="train")
+  train_vector = data_preprocessing.word_vectorizer(type="train")
   train_labels = data_preprocessing.mpaa_pre_processing(type="train")
+  test_vector = data_preprocessing.word_vectorizer(type="test")
   test_vector = data_preprocessing.word_vectorizer(type="test")
   test_labels = data_preprocessing.mpaa_pre_processing(type="test")
 
   # array of (model,sample) pairs to train and run 
   # ['knn', 'nb', 'svm', 'adaboost', 'adaboost_nb'] X 'Imbalanced', 'RUS', 'TomekLinks', 'ENN', 'ROS', 'SMOTE', 'SMOTETomek'
   '''choo_choo_trains = [('adaboost', 'ROS')]
+  choo_choo_train1 = ['nb']
+  choo_choo_train2 = ['ROS']
 
   for train in choo_choo_trains:
     model = train[0]
