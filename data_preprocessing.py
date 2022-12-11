@@ -29,6 +29,9 @@ from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
 from sklearn import utils
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix
 # from transformers import DistilBertTokenizerFast
 
 # from datasets import Dataset
@@ -372,8 +375,10 @@ def create_new_features(type="train", baseline=False, preprocessed=False):
   features_arr = scaler.transform(features_arr)
 
   # Append all the word2vec vectorizations
-  word_vectors = word_vectorizer_word2vec(type=type)
-  features_arr = np.column_stack((word_vectors, features_arr))
+  word_vectors = word_vectorizer(type=type)
+  word_vectors = word_vectors.toarray()
+
+  # features_arr = np.concatenate((word_vectors, features_arr), axis=1)
 
   # Append all the TFIDF vectorizations
   #word_vectors = word_vectorizer(type=type).toarray()
@@ -425,6 +430,50 @@ def visualize_stopwords():
   
   plt.show()
 
+"""
+Create a correlation matrix for the different features, for a limited number
+of features for visualization purposes. 
+"""
+def correlation_matrix():
+  # Get the features list from create_new_features
+  features = create_new_features()[:, 0:10]
+  features = features.astype(float)
+
+  corr_matrix = np.corrcoef(features.T)
+  corr_matrix = np.around(corr_matrix, decimals=3)
+  labels = ["avg_word_length", 
+            "avg_sentence_length", 
+            "num_punct_arr",
+            "unique_word_ct", 
+            "non_unique_word_ct",
+            "avg_syllables", 
+            "orig_len",
+            "lemma_ct",
+            "lemma_len",
+            "lemma_ratio"]
+
+  fig = plt.figure()
+  ax = fig.add_subplot(111)
+  cax = ax.matshow(corr_matrix)
+  fig.colorbar(cax)
+
+  ax.set_xticklabels(labels, rotation=90)
+  ax.set_yticklabels(labels)
+  # Set ticks on both sides of axes on
+  ax.tick_params(axis="x", bottom=True, top=False, labelbottom=True, labeltop=False)
+
+  ax.set_xticks(np.arange(len(labels)))
+  ax.set_yticks(np.arange(len(labels)))
+  ax.set_ylim(len(labels)-0.5, -0.5)
+
+
+  # plt.xticks(rotation='vertical')
+  plt.rcParams.update({'font.size': 12})
+  plt.title(f"Correlation Matrix for Engineered Features")
+  plt.tight_layout()
+  plt.savefig(f"images/correlation_matrix.png")
+
 if __name__ == "__main__":
-  visualize_stopwords()
+  # visualize_stopwords()
+  correlation_matrix()
   

@@ -74,7 +74,7 @@ def CEFR(type="train"):
   ids = get_ids(type)
 
   for id in ids:
-    dict = data[id]
+    dict = data[str(id)]
     X.append(dict["cefr_lvl"])
     y.append(dict["bt_easiness"])
 
@@ -135,9 +135,4 @@ def bt_easiness_test_data():
   return array[:, 22]
 
 if __name__ == "__main__":
-  train_data = train_data()
-  print("train")
-  print(train_data.shape)
-  test_data = test_data()
-  print("test")
-  print(test_data.shape)
+  pass
