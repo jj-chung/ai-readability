@@ -6,7 +6,7 @@ Repository for CS 229 Final Project.
 - `CLEAR_Corpus_6.01.csv` contains a CSV of all raw data from the CLEAR Corpus dataset.
 - `CLEAR_Corpus_6.01.xlsc` contains the data as an Excel sheet.
 - `cefrDATA.json` contains the cefr values/ratings for all exceprts in the dataset.
-- `cefr_bot.js` web scraper used to get CEFR values for text excerpt data.
+- `cefr_bot.js` web scraper used to get CEFR values for text excerpt data. Used the [Puppeteer API](https://pptr.dev/api/).
 - `data_preprocessing.py` contains all the functions and code used to pre-process the text excerpt data (removing stopwords, replacing contractions, vectorization, etc.). Also contains some functions for report data visualizations.
 - `deep_learning.py` code used to create and train the NN with different data input formats.
 - `imbalanced.py` contains functions called to use different resampling techniques for MPAA ratings. Used in mpaa_rating.py. 
