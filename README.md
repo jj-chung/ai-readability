@@ -16,7 +16,7 @@ Repository for CS 229 Final Project.
 - `raw_data.py` contains code to access the raw data and text excerpt data. 
 - `package-lock.json` and `package.json` are files used by the `cefr_bot.js` web scraper.
 - `text_difficulty_baseline1.py` gets the cefr rating for a single text excerpt and was used for testing purposes during the implementation of `cefr_bot.js`. 
-- `mpaa_bert_nn.ipynb` contains up to date code for BERT and application. 
+- `mpaa_bert_nn.ipynb` contains up to date code for BERT and application. Used the Base BERT model from [Transformers by Hugging Face](https://huggingface.co/docs/transformers/model_doc/bert).
 
 ## `images` directory
 Contains plots and images generated using the code in the `code` directory of the project.
